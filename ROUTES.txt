@@ -1,0 +1,53 @@
+app/
+├── (auth)/
+│   ├── login/
+│   │   └── page.jsx
+│   └── register/
+│       └── page.jsx
+├── (dashboard)/
+│   └── dashboard/
+│       ├── page.jsx              # /dashboard
+│       ├── my-reports/
+│       │   └── page.jsx          # /dashboard/my-reports
+│       ├── saved/
+│       │   └── page.jsx          # /dashboard/saved
+│       ├── notifications/
+│       │   └── page.jsx          # /dashboard/notifications
+│       └── settings/
+│           └── page.jsx          # /dashboard/settings
+├── (public)/
+│   ├── page.jsx                  # / (Home feed)
+│   ├── about/
+│   │   └── page.jsx              # /about
+│   ├── report/
+│   │   └── page.jsx              # /report
+│   ├── map/
+│   │   └── page.jsx              # /map
+│   └── issues/
+│       ├── page.jsx              # /issues
+│       ├── [id]/
+│       │   └── page.jsx          # /issues/:id
+│       ├── nearby/
+│       │   └── page.jsx          # /issues/nearby
+│       ├── trending/
+│       │   └── page.jsx          # /issues/trending
+│       └── resolved/
+│           └── page.jsx          # /issues/resolved
+└── api/
+    ├── issues/
+    │   ├── route.js              # GET & POST /api/issues
+    │   ├── map-pins/
+    │   │   └── route.js          # GET /api/issues/map-pins
+    │   ├── nearby/
+    │   │   └── route.js          # GET /api/issues/nearby
+    │   └── [id]/
+    │       └── route.js          # GET & PATCH /api/issues/:id
+    ├── user/
+    │   ├── reports/
+    │   │   └── route.js          # GET /api/user/reports
+    │   └── saved/
+    │       ├── route.js          # GET & POST /api/user/saved
+    │       └── [id]/
+    │           └── route.js      # DELETE /api/user/saved/:id
+    └── upload/
+        └── route.js              # POST /api/upload
