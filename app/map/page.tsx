@@ -13,7 +13,7 @@ const IssueMap = dynamic(() => import("@/components/IssueMap"), {
     <div className="flex h-full w-full items-center justify-center bg-[#e8ece7] text-[#4b5563]">
       <div className="flex flex-col items-center gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-3 border-[#0f5d4a] border-t-transparent"></div>
-        <span className="text-sm font-medium">Loading interactive Enugu map...</span>
+        <span className="text-sm font-medium">Loading interactive Uyo map...</span>
       </div>
     </div>
   ),
@@ -24,7 +24,7 @@ const INITIAL_MAP_ISSUES: MapIssue[] = [
     id: "1",
     title: "Bad Road / Pothole",
     category: "Bad Road / Pothole",
-    location: "Unity Road, GRA, Enugu",
+    location: "Unity Road, GRA, Uyo",
     lat: 6.4535,
     lng: 7.5098,
     status: "Submitted",
@@ -38,7 +38,7 @@ const INITIAL_MAP_ISSUES: MapIssue[] = [
     id: "2",
     title: "Broken Streetlight",
     category: "Broken Streetlight",
-    location: "Park Avenue, GRA, Enugu",
+    location: "Park Avenue, GRA, Uyo",
     lat: 6.462,
     lng: 7.518,
     status: "Under Review",
@@ -52,7 +52,7 @@ const INITIAL_MAP_ISSUES: MapIssue[] = [
     id: "3",
     title: "Flooding",
     category: "Flooding",
-    location: "Independence Layout, Enugu",
+    location: "Ewet Housing Estate, Uyo",
     lat: 6.435,
     lng: 7.531,
     status: "Submitted",
@@ -66,7 +66,7 @@ const INITIAL_MAP_ISSUES: MapIssue[] = [
     id: "4",
     title: "Waste Disposal",
     category: "Waste Disposal",
-    location: "Abakpa Nike, Enugu",
+    location: "Nwaniba, Uyo",
     lat: 6.478,
     lng: 7.536,
     status: "Submitted",
@@ -80,7 +80,7 @@ const INITIAL_MAP_ISSUES: MapIssue[] = [
     id: "5",
     title: "Water Shortage",
     category: "Water Shortage",
-    location: "New Haven, Enugu",
+    location: "Nka, Uyo",
     lat: 6.4445,
     lng: 7.5215,
     status: "Resolved",
@@ -94,7 +94,7 @@ const INITIAL_MAP_ISSUES: MapIssue[] = [
     id: "6",
     title: "Power Grid Instability",
     category: "Power / Electricity",
-    location: "Achara Layout, Enugu",
+    location: "Itam, Uyo",
     lat: 6.426,
     lng: 7.498,
     status: "Under Review",
@@ -108,7 +108,7 @@ const INITIAL_MAP_ISSUES: MapIssue[] = [
     id: "7",
     title: "Security Concern",
     category: "Security Concern",
-    location: "Ogui Road, Enugu",
+    location: "Ikot Ekpene Road, Uyo",
     lat: 6.442,
     lng: 7.502,
     status: "Submitted",
@@ -122,7 +122,7 @@ const INITIAL_MAP_ISSUES: MapIssue[] = [
     id: "8",
     title: "Overgrown Bushes & Blocked Drain",
     category: "Others",
-    location: "Trans-Ekulu, Enugu",
+    location: "Nsukara Offot, Uyo",
     lat: 6.467,
     lng: 7.493,
     status: "Resolved",
@@ -136,7 +136,7 @@ const INITIAL_MAP_ISSUES: MapIssue[] = [
     id: "9",
     title: "Streetlight outage",
     category: "Broken Streetlight",
-    location: "Zik Avenue, Uwani, Enugu",
+    location: "Udo Udoma, Uyo",
     lat: 6.418,
     lng: 7.505,
     status: "Submitted",
@@ -385,11 +385,10 @@ export default function MapPage() {
                   onClick={() =>
                     setSelectedCategory(isSelected ? "All Categories" : cat)
                   }
-                  className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition ${
-                    isSelected
+                  className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition ${isSelected
                       ? "bg-[#eaf4ef] font-bold text-[#0f5d4a]"
                       : "text-[#4b5563] hover:bg-[#f4f6f3]"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <span
@@ -472,11 +471,10 @@ export default function MapPage() {
                     key={st}
                     type="button"
                     onClick={() => toggleStatus(st)}
-                    className={`rounded-xl py-1.5 px-2 text-center text-xs font-semibold transition ${
-                      selectedStatuses[st]
+                    className={`rounded-xl py-1.5 px-2 text-center text-xs font-semibold transition ${selectedStatuses[st]
                         ? "bg-[#0f5d4a] text-white"
                         : "bg-[#f4f5f3] text-[#4b5563]"
-                    }`}
+                      }`}
                   >
                     {st}
                   </button>

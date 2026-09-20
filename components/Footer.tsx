@@ -15,7 +15,7 @@ export default function Footer() {
               <span className="text-lg font-black tracking-tight text-[#0f5d4a]">CIRP</span>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-[#6b7280]">
-              Community Issues Report Platform empowers residents across Enugu and beyond to report, track, and resolve neighborhood problems together.
+              Community Issues Report Platform empowers residents across Akwa Ibom, Uyo, and surrounding neighbourhoods to report, track, and resolve community problems together.
             </p>
           </div>
 

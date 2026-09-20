@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
@@ -29,7 +30,7 @@ const INITIAL_ISSUES: IssueItem[] = [
     id: "1",
     title: "Bad Road / Pothole",
     category: "Road Infrastructure",
-    location: "Unity Road, GRA, Enugu",
+    location: "Unity Road, GRA, Uyo",
     time: "10 mins ago",
     votes: 12,
     comments: 3,
@@ -47,7 +48,7 @@ const INITIAL_ISSUES: IssueItem[] = [
     id: "2",
     title: "Broken Streetlight",
     category: "Electricity & Lighting",
-    location: "Park Avenue, GRA, Enugu",
+    location: "Park Avenue, GRA, Uyo",
     time: "30 mins ago",
     votes: 8,
     comments: 1,
@@ -65,7 +66,7 @@ const INITIAL_ISSUES: IssueItem[] = [
     id: "3",
     title: "Waste Disposal",
     category: "Sanitation",
-    location: "Abakpa Nike, Enugu",
+    location: "Nwaniba, Uyo",
     time: "1 hour ago",
     votes: 15,
     comments: 2,
@@ -83,7 +84,7 @@ const INITIAL_ISSUES: IssueItem[] = [
     id: "4",
     title: "Flooding",
     category: "Drainage & Water",
-    location: "Independence Layout, Enugu",
+    location: "Ewet Housing Estate, Uyo",
     time: "2 hours ago",
     votes: 20,
     comments: 6,
@@ -101,7 +102,7 @@ const INITIAL_ISSUES: IssueItem[] = [
     id: "5",
     title: "Water Shortage",
     category: "Public Utilities",
-    location: "New Haven, Enugu",
+    location: "Nka, Uyo",
     time: "1 day ago",
     votes: 16,
     comments: 4,
@@ -119,7 +120,7 @@ const INITIAL_ISSUES: IssueItem[] = [
     id: "6",
     title: "Power Grid Instability",
     category: "Power Supply",
-    location: "Achara Layout, Enugu",
+    location: "Itam, Uyo",
     time: "3 hours ago",
     votes: 24,
     comments: 9,
@@ -136,6 +137,7 @@ const INITIAL_ISSUES: IssueItem[] = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   const [issues, setIssues] = useState<IssueItem[]>(INITIAL_ISSUES);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -254,16 +256,14 @@ export default function HomePage() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl p-2 transition ${
-                    isSelected
-                      ? "bg-[#e5f1ea] text-[#0f5d4a] font-semibold ring-1 ring-[#0f5d4a]"
-                      : "bg-white text-[#4b5563] shadow-2xs hover:bg-[#eef2ee]"
-                  }`}
+                  className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl p-2 transition ${isSelected
+                    ? "bg-[#e5f1ea] text-[#0f5d4a] font-semibold ring-1 ring-[#0f5d4a]"
+                    : "bg-white text-[#4b5563] shadow-2xs hover:bg-[#eef2ee]"
+                    }`}
                 >
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                      isSelected ? "bg-[#0f5d4a] text-white" : "bg-[#ecf5f0] text-[#0f5d4a]"
-                    }`}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full ${isSelected ? "bg-[#0f5d4a] text-white" : "bg-[#ecf5f0] text-[#0f5d4a]"
+                      }`}
                   >
                     {item.icon}
                   </div>
@@ -375,11 +375,10 @@ export default function HomePage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`rounded-full px-3.5 py-1 text-xs font-medium transition ${
-                      activeTab === tab.id
-                        ? "bg-[#0f5d4a] text-white shadow-2xs"
-                        : "text-[#4b5563] hover:text-[#0f172a]"
-                    }`}
+                    className={`rounded-full px-3.5 py-1 text-xs font-medium transition ${activeTab === tab.id
+                      ? "bg-[#0f5d4a] text-white shadow-2xs"
+                      : "text-[#4b5563] hover:text-[#0f172a]"
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -422,7 +421,16 @@ export default function HomePage() {
                   return (
                     <article
                       key={`mobile-${issue.id}`}
-                      className="flex items-center gap-3 rounded-2xl border border-[#e2e6e1] bg-white p-2.5 shadow-2xs transition active:scale-99"
+                      onClick={() => router.push(`/issues/${issue.id}`)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          router.push(`/issues/${issue.id}`);
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[#e2e6e1] bg-white p-2.5 shadow-2xs transition active:scale-99 focus:outline-none focus:ring-2 focus:ring-[#0f5d4a]/20"
                     >
                       {/* Left Thumbnail */}
                       <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-[#e5e7eb]">
@@ -467,10 +475,12 @@ export default function HomePage() {
                             <span>{issue.time}</span>
                             <button
                               type="button"
-                              onClick={() => toggleUpvote(issue.id)}
-                              className={`flex items-center gap-0.5 ${
-                                isUpvoted ? "font-bold text-[#ef4444]" : "hover:text-[#ef4444]"
-                              }`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                toggleUpvote(issue.id);
+                              }}
+                              className={`flex items-center gap-0.5 ${isUpvoted ? "font-bold text-[#ef4444]" : "hover:text-[#ef4444]"
+                                }`}
                               aria-label={`Upvote ${issue.title}`}
                             >
                               <svg
@@ -499,7 +509,16 @@ export default function HomePage() {
                   return (
                     <article
                       key={`desktop-${issue.id}`}
-                      className="group flex flex-col overflow-hidden rounded-2xl border border-[#e2e6e1] bg-white shadow-xs transition duration-200 hover:-translate-y-1 hover:border-[#0f5d4a]/30 hover:shadow-md"
+                      onClick={() => router.push(`/issues/${issue.id}`)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          router.push(`/issues/${issue.id}`);
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#e2e6e1] bg-white shadow-xs transition duration-200 hover:-translate-y-1 hover:border-[#0f5d4a]/30 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#0f5d4a]/20"
                     >
                       {/* Card Media with Status Badge */}
                       <div className="relative h-44 w-full overflow-hidden bg-[#e5e7eb]">
@@ -553,12 +572,14 @@ export default function HomePage() {
                             {/* Upvote heart button */}
                             <button
                               type="button"
-                              onClick={() => toggleUpvote(issue.id)}
-                              className={`flex items-center gap-1 transition ${
-                                isUpvoted
-                                  ? "font-bold text-[#ef4444]"
-                                  : "text-[#717b8a] hover:text-[#ef4444]"
-                              }`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                toggleUpvote(issue.id);
+                              }}
+                              className={`flex items-center gap-1 transition ${isUpvoted
+                                ? "font-bold text-[#ef4444]"
+                                : "text-[#717b8a] hover:text-[#ef4444]"
+                                }`}
                               aria-label={`Upvote ${issue.title}`}
                             >
                               <svg

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signUpWithEmail } from "@/lib/supabase";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -10,7 +11,7 @@ export default function RegisterPage() {
     fullName: "",
     email: "",
     phone: "",
-    communityArea: "GRA, Enugu",
+    city: "Uyo",
     password: "",
     confirmPassword: "",
     agreedToTerms: false,
@@ -34,7 +35,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
@@ -61,14 +62,24 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    // Simulate account registration
-    setTimeout(() => {
-      setIsLoading(false);
-      setSuccessMessage("Account created successfully! Redirecting to CIRP feed...");
+    try {
+      await signUpWithEmail({
+        email: formData.email.trim(),
+        password: formData.password,
+        fullName: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+      });
+
+      setSuccessMessage("Account created successfully! Check your email to confirm signup, then sign in.");
       setTimeout(() => {
-        router.push("/");
-      }, 1000);
-    }, 900);
+        router.push("/login");
+      }, 1200);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create your account.";
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -143,7 +154,7 @@ export default function RegisterPage() {
                 Create an Account
               </h1>
               <p className="mt-1.5 text-xs sm:text-sm text-[#64748b]">
-                Join community residents in Enugu & beyond reporting and tracking real change.
+                Join community residents in Uyo and surrounding neighbourhoods reporting and tracking real change.
               </p>
             </div>
 
@@ -256,31 +267,38 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Residential Community / Area */}
+              {/* City / Neighborhood */}
               <div>
                 <label
-                  htmlFor="communityArea"
+                  htmlFor="city"
                   className="block text-xs font-semibold uppercase tracking-wider text-[#374151]"
                 >
-                  Primary Community / Neighborhood
+                  City / Neighborhood
                 </label>
                 <div className="relative mt-1.5">
-                  <select
-                    id="communityArea"
-                    name="communityArea"
-                    value={formData.communityArea}
+                  <input
+                    id="city"
+                    name="city"
+                    type="text"
+                    list="city-options"
+                    value={formData.city}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-[#d8dcd6] bg-[#f9faf9] py-2.5 px-3.5 text-sm text-[#0f172a] transition focus:border-[#0f5d4a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f5d4a]/20"
-                  >
-                    <option value="GRA, Enugu">GRA, Enugu</option>
-                    <option value="Independence Layout, Enugu">Independence Layout, Enugu</option>
-                    <option value="Abakpa Nike, Enugu">Abakpa Nike, Enugu</option>
-                    <option value="New Haven, Enugu">New Haven, Enugu</option>
-                    <option value="Achara Layout, Enugu">Achara Layout, Enugu</option>
-                    <option value="Ogui New Layout, Enugu">Ogui New Layout, Enugu</option>
-                    <option value="Trans-Ekulu, Enugu">Trans-Ekulu, Enugu</option>
-                    <option value="Other Area">Other Community</option>
-                  </select>
+                    placeholder="e.g. Uyo, Eket, Ikot Ekpene, Oron"
+                    className="w-full rounded-xl border border-[#d8dcd6] bg-[#f9faf9] py-2.5 px-3.5 text-sm text-[#0f172a] placeholder:text-[#9ca3af] transition focus:border-[#0f5d4a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f5d4a]/20"
+                  />
+                  <datalist id="city-options">
+                    <option value="Uyo" />
+                    <option value="Eket" />
+                    <option value="Ikot Ekpene" />
+                    <option value="Oron" />
+                    <option value="Abak" />
+                    <option value="Etinan" />
+                    <option value="Itu" />
+                    <option value="Nsit Atai" />
+                    <option value="Onna" />
+                    <option value="Mbo" />
+                    <option value="Ini" />
+                  </datalist>
                 </div>
               </div>
 
