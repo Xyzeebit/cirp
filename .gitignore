@@ -18,6 +18,10 @@
 /out/
 
 /art_inspired_design_system_for_AI-main
+/UI
+
+ARCHITECTURE.md
+ROUTES.txt
 
 # production
 /build
