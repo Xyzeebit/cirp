@@ -211,7 +211,7 @@ export default function ReportPage() {
             });
 
             setSuccessMessage("Issue submitted successfully.");
-            router.push(`/issues/${issue.id}`);
+            router.push(`/issues/${issue.id}?submitted=1`);
         } catch (error) {
             const message = error instanceof Error ? error.message : "Unable to submit issue.";
             setErrorMessage(message);

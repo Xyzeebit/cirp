@@ -6,10 +6,10 @@ import Navbar from "@/components/Navbar";
 import { signOut, supabase } from "@/lib/supabase";
 
 const stats = [
-    { label: "My Reports", value: 12, accent: "bg-[#eaf4ef] text-[#0f5d4a]" },
-    { label: "Under Review", value: 5, accent: "bg-[#fff7e8] text-[#d97706]" },
-    { label: "Resolved", value: 7, accent: "bg-[#eafaf2] text-[#15803d]" },
-    { label: "Saved Issues", value: 9, accent: "bg-[#eef2ff] text-[#4338ca]" },
+    { label: "My Reports", value: 12, accent: "bg-[rgba(17,17,17,0.04)] text-[var(--foreground)]" },
+    { label: "Under Review", value: 5, accent: "bg-[rgba(238,124,45,0.08)] text-[var(--primary)]" },
+    { label: "Resolved", value: 7, accent: "bg-[rgba(15,93,74,0.08)] text-[var(--muted)]" },
+    { label: "Saved Issues", value: 9, accent: "bg-[rgba(255,255,255,0.35)] text-[var(--foreground)]" },
 ];
 
 const recentReports = [
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                                 <input defaultValue="Uyo" className="mt-1 w-full rounded-xl border border-[#d8dcd6] bg-[#f9faf9] px-3 py-2.5 text-[#0f172a] outline-none focus:border-[#0f5d4a] focus:ring-2 focus:ring-[#0f5d4a]/20" />
                             </label>
                         </div>
-                        <button type="button" className="mt-5 rounded-xl bg-[#0f5d4a] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0c4c3c]">
+                        <button type="button" className="mt-5 rounded-xl border border-[rgba(17,17,17,0.08)] bg-white/70 px-4 py-2.5 text-sm font-semibold text-[var(--foreground)] shadow-xs transition hover:border-[var(--primary)] hover:text-[var(--primary)]">
                             Save changes
                         </button>
                     </div>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
                             <h1 className="text-[clamp(1.8rem,2vw,2.1rem)] font-black tracking-tight text-[#0f172a]">
                                 Dashboard Overview
                             </h1>
-                            <p className="mt-2 text-sm text-[#475569]">Welcome back, {displayName.split(" ")[0]}! 👋</p>
+                            <p className="mt-2 text-sm text-[#475569]">Welcome back, {displayName.split(" ")[0]}.</p>
                             <p className="mt-1 text-sm text-[#64748b]">Here&apos;s what&apos;s happening in your community.</p>
 
                             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -275,7 +275,7 @@ export default function DashboardPage() {
                                 </div>
 
                                 <div className="mt-4 flex justify-center sm:justify-start">
-                                    <button type="button" className="text-sm font-semibold text-[#0f5d4a] hover:text-[#0c4c3c]">
+                                    <button type="button" className="text-sm font-semibold text-[var(--primary)] hover:text-[var(--primary-strong)]">
                                         View all reports
                                     </button>
                                 </div>
@@ -318,8 +318,8 @@ export default function DashboardPage() {
                                 <section className="rounded-[18px] border border-[#e2e6e1] bg-white p-4 shadow-sm sm:p-5">
                                     <h2 className="text-xl font-black tracking-tight text-[#0f172a]">Impact in Your Community</h2>
 
-                                    <div className="mt-4 flex items-center gap-4 rounded-2xl border border-[#e9efe7] bg-[#f3faf5] p-3">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eaf4ef] text-xl">🌱</div>
+                                    <div className="mt-4 flex items-center gap-4 rounded-2xl border border-[rgba(17,17,17,0.08)] bg-[rgba(255,255,255,0.4)] p-3">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(238,124,45,0.08)] text-lg font-bold text-[var(--primary)]">+</div>
                                         <p className="text-sm font-medium text-[#1f2937]">
                                             Thank you for helping improve your community!
                                         </p>
@@ -335,12 +335,12 @@ export default function DashboardPage() {
     return (
         <>
             <Navbar />
-            <div className="min-h-screen bg-[#eef2ee] px-3 py-4 sm:px-5 lg:px-8">
-                <div className="mx-auto max-w-[1200px] overflow-hidden rounded-[24px] border border-[#dfe4de] bg-[#f5f6f4] shadow-[0_16px_45px_rgba(15,23,42,0.06)]">
+            <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.65),_rgba(238,242,236,0.95)_45%,_rgba(231,234,228,0.9))] px-3 py-4 sm:px-5 lg:px-8">
+                <div className="mx-auto max-w-[1200px] overflow-hidden rounded-[24px] border border-[rgba(255,255,255,0.5)] bg-[rgba(255,255,255,0.28)] shadow-[0_16px_45px_rgba(15,23,42,0.08)] backdrop-blur-xl">
                     <div className="flex min-h-[860px] flex-col lg:flex-row">
-                        <aside className="w-full border-b border-[#e2e6e1] bg-[#f9faf8] p-4 lg:w-[240px] lg:border-b-0 lg:border-r">
+                        <aside className="w-full border-b border-[rgba(17,17,17,0.08)] bg-[rgba(255,255,255,0.2)] p-4 lg:w-[240px] lg:border-b-0 lg:border-r">
                             <div className="flex items-center gap-3 pb-5">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#0f5d4a] bg-[#eaf4ef] text-[#0f5d4a] shadow-sm">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(17,17,17,0.08)] bg-white/70 text-[var(--primary)] shadow-sm">
                                     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                                         <circle cx="11" cy="11" r="7" />
                                         <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -348,8 +348,8 @@ export default function DashboardPage() {
                                     </svg>
                                 </div>
                                 <div className="leading-tight">
-                                    <div className="text-[1.55rem] font-black tracking-tight text-[#0f5d4a]">Dashboard</div>
-                                    <div className="text-[0.7rem] leading-[1.2] text-[#4b5563]">
+                                    <div className="text-[1.55rem] font-black tracking-tight text-[var(--foreground)]">Dashboard</div>
+                                    <div className="text-[0.7rem] leading-[1.2] text-[var(--muted)]">
                                         Account
                                         <br />
                                         Overview
@@ -365,13 +365,13 @@ export default function DashboardPage() {
                                             key={item.label}
                                             type="button"
                                             onClick={() => handleMenuClick(item.id)}
-                                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${isActive ? "bg-[#0f5d4a] text-white shadow-sm" : "text-[#374151] hover:bg-[#eef2ee] hover:text-[#0f5d4a]"
+                                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${isActive ? "bg-white/70 text-[var(--foreground)] shadow-sm ring-1 ring-[rgba(17,17,17,0.05)]" : "text-[var(--muted)] hover:bg-[rgba(17,17,17,0.04)] hover:text-[var(--foreground)]"
                                                 }`}
                                         >
-                                            <span className="flex h-5 w-5 items-center justify-center text-[0.95rem]">{item.icon}</span>
+                                            <span className="flex h-5 w-5 items-center justify-center text-[0.95rem] text-[var(--primary)]">{item.icon}</span>
                                             <span>{item.label}</span>
                                             {"badge" in item && item.badge ? (
-                                                <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ef4444] px-1.5 text-[0.62rem] font-bold text-white">
+                                                <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[rgba(238,124,45,0.14)] px-1.5 text-[0.62rem] font-bold text-[var(--primary)]">
                                                     {item.badge}
                                                 </span>
                                             ) : null}
@@ -381,24 +381,27 @@ export default function DashboardPage() {
                             </nav>
                         </aside>
 
-                        <main className="flex-1 bg-[#f7f8f6] p-4 sm:p-5 lg:p-7">
+                        <main className="flex-1 bg-[rgba(255,255,255,0.12)] p-4 sm:p-5 lg:p-7">
                             <header className="flex items-center justify-between gap-3 pb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="hidden h-10 w-10 items-center justify-center rounded-full border border-[#dfe4de] bg-white text-xl shadow-sm sm:flex">
-                                        🔔
+                                    <div className="hidden h-10 w-10 items-center justify-center rounded-full border border-[rgba(17,17,17,0.08)] bg-white/60 text-lg text-[var(--primary)] shadow-sm sm:flex">
+                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                                            <path d="M10 21a2 2 0 0 0 4 0" />
+                                        </svg>
                                     </div>
-                                    <div className="h-10 w-10 overflow-hidden rounded-full border border-[#dfe4de] bg-white shadow-sm">
+                                    <div className="h-10 w-10 overflow-hidden rounded-full border border-[rgba(17,17,17,0.08)] bg-white/60 shadow-sm">
                                         {avatarUrl ? (
                                             <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
                                         ) : (
-                                            <div className="flex h-full w-full items-center justify-center bg-[#eaf4ef] text-sm font-bold text-[#0f5d4a]">
+                                            <div className="flex h-full w-full items-center justify-center bg-[rgba(238,124,45,0.08)] text-sm font-bold text-[var(--primary)]">
                                                 {initials}
                                             </div>
                                         )}
                                     </div>
-                                    <div className="text-sm font-medium text-[#4b5563]">
-                                        <div className="text-[0.7rem] uppercase tracking-[0.08em] text-[#64748b]">Resident</div>
-                                        <div className="text-base font-semibold text-[#0f172a]">{displayName}</div>
+                                    <div className="text-sm font-medium text-[var(--muted)]">
+                                        <div className="text-[0.7rem] uppercase tracking-[0.08em] text-[var(--muted)]">Resident</div>
+                                        <div className="text-base font-semibold text-[var(--foreground)]">{displayName}</div>
                                     </div>
                                 </div>
                             </header>

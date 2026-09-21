@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import MobileBottomNav from "@/components/MobileBottomNav";
 import { MapIssue, CATEGORY_COLORS } from "@/components/IssueMap";
 
 // Dynamically import Leaflet IssueMap to avoid SSR 'window is not defined'
@@ -218,29 +217,17 @@ export default function MapPage() {
   }, [issues, selectedCategory, selectedStatuses, searchLocation]);
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#f4f5f3] text-[#0f172a]">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#f7f3ef] text-[#111111]">
       {/* Top Header (Matching UI/map.png) */}
-      <header className="z-40 border-b border-[#dfe3de] bg-white/95 px-4 py-3 sm:px-8 lg:px-12 backdrop-blur-md">
+      <header className="z-40 border-b border-[#e7ddd3] bg-white/90 px-4 py-3 sm:px-8 lg:px-12 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4">
           {/* CIRP Brand Logo */}
           <Link href="/" className="group flex items-center gap-2.5 sm:gap-3 shrink-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0f5d4a] bg-[#eaf4ef] text-[#0f5d4a] shadow-2xs transition group-hover:scale-105">
-              <svg
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#0f5d4a"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                <circle cx="11" cy="11" r="2.5" fill="#0f5d4a" />
-              </svg>
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#ee7c2d] bg-[#fff3e8] text-[#ee7c2d] shadow-2xs transition group-hover:scale-105">
+              <img src="/logo.svg" alt="CIRP logo" className="h-5 w-5" />
             </div>
             <div className="leading-tight">
-              <div className="text-[1.2rem] font-black tracking-tight text-[#0f5d4a]">
+              <div className="text-[1.2rem] font-black tracking-tight text-[#111111]">
                 CIRP
               </div>
               <div className="hidden text-[0.68rem] font-medium leading-[1.15] text-[#4b5563] sm:block">
@@ -267,7 +254,7 @@ export default function MapPage() {
             </Link>
             <Link
               href="/map"
-              className="relative py-1 text-[0.96rem] font-bold text-[#0f5d4a] after:absolute after:bottom-[-2px] after:left-0 after:h-[2.5px] after:w-full after:rounded-full after:bg-[#0f5d4a]"
+              className="relative py-1 text-[0.96rem] font-bold text-[#ee7c2d] after:absolute after:bottom-[-2px] after:left-0 after:h-[2.5px] after:w-full after:rounded-full after:bg-[#ee7c2d]"
             >
               Map
             </Link>
@@ -302,7 +289,7 @@ export default function MapPage() {
                 placeholder="Search location..."
                 value={searchLocation}
                 onChange={(e) => setSearchLocation(e.target.value)}
-                className="w-full rounded-full border border-[#d8dcd6] bg-white py-2 pl-9 pr-8 text-sm text-[#0f172a] placeholder:text-[#8d95a5] shadow-xs transition focus:border-[#0f5d4a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f5d4a]/20"
+                className="w-full rounded-full border border-[#e7ddd3] bg-white py-2 pl-9 pr-8 text-sm text-[#111111] placeholder:text-[#8d95a5] shadow-xs transition focus:border-[#ee7c2d] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ee7c2d]/20"
               />
               {searchLocation && (
                 <button
@@ -320,13 +307,13 @@ export default function MapPage() {
           <div className="hidden sm:flex items-center gap-2.5 shrink-0">
             <Link
               href="/login"
-              className="rounded-full border border-[#d5dad3] bg-white/80 px-4 py-1.5 text-sm font-medium text-[#1e293b] shadow-xs transition hover:border-[#0f5d4a] hover:bg-white hover:text-[#0f5d4a]"
+              className="rounded-full border border-[#e7ddd3] bg-white/80 px-4 py-1.5 text-sm font-medium text-[#1e293b] shadow-xs transition hover:border-[#ee7c2d] hover:bg-white hover:text-[#ee7c2d]"
             >
               Login
             </Link>
             <Link
               href="/register"
-              className="rounded-full bg-[#0f5d4a] px-4.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0c4c3c] hover:shadow-md active:scale-98"
+              className="rounded-full bg-[#ee7c2d] px-4.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#d76a1a] hover:shadow-md active:scale-98"
             >
               Register
             </Link>
@@ -336,7 +323,7 @@ export default function MapPage() {
           <button
             type="button"
             onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-            className="flex md:hidden items-center gap-1.5 rounded-full border border-[#0f5d4a] bg-[#eaf4ef] px-3 py-1.5 text-xs font-bold text-[#0f5d4a] shadow-xs"
+            className="flex md:hidden items-center gap-1.5 rounded-full border border-[#ee7c2d] bg-[#fff3e8] px-3 py-1.5 text-xs font-bold text-[#ee7c2d] shadow-xs"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
@@ -352,7 +339,7 @@ export default function MapPage() {
         <aside className="absolute left-6 top-6 z-30 hidden md:block w-72 rounded-2xl border border-[#dfe4de] bg-white p-5 shadow-xl backdrop-blur-md">
           <div className="flex items-center justify-between pb-3 border-b border-[#eef1ec]">
             <h3 className="text-base font-bold text-[#0f172a]">Map Filters</h3>
-            <span className="rounded-full bg-[#eaf4ef] px-2 py-0.5 text-xs font-semibold text-[#0f5d4a]">
+            <span className="rounded-full bg-[#fff3e8] px-2 py-0.5 text-xs font-semibold text-[#ee7c2d]">
               {filteredIssues.length} found
             </span>
           </div>
@@ -362,7 +349,7 @@ export default function MapPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full rounded-xl border border-[#d8dcd6] bg-[#f9faf9] py-2 px-3 text-xs font-medium text-[#0f172a] transition focus:border-[#0f5d4a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f5d4a]/20"
+              className="w-full rounded-xl border border-[#e7ddd3] bg-[#fffaf5] py-2 px-3 text-xs font-medium text-[#111111] transition focus:border-[#ee7c2d] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ee7c2d]/20"
             >
               <option value="All Categories">All Categories</option>
               {ALL_CATEGORIES.map((cat) => (
@@ -386,8 +373,8 @@ export default function MapPage() {
                     setSelectedCategory(isSelected ? "All Categories" : cat)
                   }
                   className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition ${isSelected
-                      ? "bg-[#eaf4ef] font-bold text-[#0f5d4a]"
-                      : "text-[#4b5563] hover:bg-[#f4f6f3]"
+                    ? "bg-[#fff3e8] font-bold text-[#ee7c2d]"
+                    : "text-[#4b5563] hover:bg-[#f9f3ee]"
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -422,7 +409,7 @@ export default function MapPage() {
                     type="checkbox"
                     checked={!!selectedStatuses[status.name]}
                     onChange={() => toggleStatus(status.name)}
-                    className="h-4 w-4 rounded border-[#cbd5e1] text-[#0f5d4a] focus:ring-[#0f5d4a]"
+                    className="h-4 w-4 rounded border-[#d7c7b8] text-[#ee7c2d] focus:ring-[#ee7c2d]"
                   />
                   <span>{status.name}</span>
                 </label>
@@ -451,7 +438,7 @@ export default function MapPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-[#d8dcd6] bg-[#f9faf9] py-2 px-3 text-xs font-medium text-[#0f172a]"
+                className="mt-1 w-full rounded-xl border border-[#e7ddd3] bg-[#fffaf5] py-2 px-3 text-xs font-medium text-[#111111]"
               >
                 <option value="All Categories">All Categories</option>
                 {ALL_CATEGORIES.map((cat) => (
@@ -472,8 +459,8 @@ export default function MapPage() {
                     type="button"
                     onClick={() => toggleStatus(st)}
                     className={`rounded-xl py-1.5 px-2 text-center text-xs font-semibold transition ${selectedStatuses[st]
-                        ? "bg-[#0f5d4a] text-white"
-                        : "bg-[#f4f5f3] text-[#4b5563]"
+                      ? "bg-[#ee7c2d] text-white"
+                      : "bg-[#f7f3ef] text-[#4b5563]"
                       }`}
                   >
                     {st}
@@ -485,7 +472,7 @@ export default function MapPage() {
             <button
               type="button"
               onClick={() => setMobileFilterOpen(false)}
-              className="mt-5 w-full rounded-xl bg-[#0f5d4a] py-2.5 text-xs font-bold text-white shadow-sm"
+              className="mt-5 w-full rounded-xl bg-[#ee7c2d] py-2.5 text-xs font-bold text-white shadow-sm"
             >
               Apply Filters ({filteredIssues.length} issues)
             </button>
@@ -502,8 +489,6 @@ export default function MapPage() {
         />
       </div>
 
-      {/* Mobile Bottom Navigation (Map icon active) */}
-      <MobileBottomNav />
     </div>
   );
 }

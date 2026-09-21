@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
+import { getIssues, type IssueRecord } from "@/lib/supabase";
 
 interface IssueItem {
   id: string;
@@ -25,123 +25,77 @@ interface IssueItem {
   filterTags: string[];
 }
 
-const INITIAL_ISSUES: IssueItem[] = [
-  {
-    id: "1",
-    title: "Bad Road / Pothole",
-    category: "Road Infrastructure",
-    location: "Unity Road, GRA, Uyo",
-    time: "10 mins ago",
-    votes: 12,
-    comments: 3,
-    status: "Submitted",
-    statusColor: {
-      bg: "bg-[#feece2]",
-      text: "text-[#d96515]",
-      border: "border-[#fcd7c3]",
-    },
-    image:
-      "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80",
-    filterTags: ["all", "nearby"],
-  },
-  {
-    id: "2",
-    title: "Broken Streetlight",
-    category: "Electricity & Lighting",
-    location: "Park Avenue, GRA, Uyo",
-    time: "30 mins ago",
-    votes: 8,
-    comments: 1,
-    status: "Under Review",
-    statusColor: {
-      bg: "bg-[#fef3c7]",
-      text: "text-[#b45309]",
-      border: "border-[#fde68a]",
-    },
-    image:
-      "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80",
-    filterTags: ["all", "nearby", "trending"],
-  },
-  {
-    id: "3",
-    title: "Waste Disposal",
-    category: "Sanitation",
-    location: "Nwaniba, Uyo",
-    time: "1 hour ago",
-    votes: 15,
-    comments: 2,
-    status: "Submitted",
-    statusColor: {
-      bg: "bg-[#feece2]",
-      text: "text-[#d96515]",
-      border: "border-[#fcd7c3]",
-    },
-    image:
-      "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80",
-    filterTags: ["all", "trending"],
-  },
-  {
-    id: "4",
-    title: "Flooding",
-    category: "Drainage & Water",
-    location: "Ewet Housing Estate, Uyo",
-    time: "2 hours ago",
-    votes: 20,
-    comments: 6,
-    status: "Submitted",
-    statusColor: {
-      bg: "bg-[#feece2]",
-      text: "text-[#d96515]",
-      border: "border-[#fcd7c3]",
-    },
-    image:
-      "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=800&q=80",
-    filterTags: ["all", "trending"],
-  },
-  {
-    id: "5",
-    title: "Water Shortage",
-    category: "Public Utilities",
-    location: "Nka, Uyo",
-    time: "1 day ago",
-    votes: 16,
-    comments: 4,
-    status: "Resolved",
-    statusColor: {
-      bg: "bg-[#dcfce7]",
-      text: "text-[#15803d]",
-      border: "border-[#bbf7d0]",
-    },
-    image:
-      "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&w=800&q=80",
-    filterTags: ["all", "resolved"],
-  },
-  {
-    id: "6",
-    title: "Power Grid Instability",
-    category: "Power Supply",
-    location: "Itam, Uyo",
-    time: "3 hours ago",
-    votes: 24,
-    comments: 9,
-    status: "Under Review",
-    statusColor: {
-      bg: "bg-[#fef3c7]",
-      text: "text-[#b45309]",
-      border: "border-[#fde68a]",
-    },
-    image:
-      "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=800&q=80",
-    filterTags: ["all", "nearby", "trending"],
-  },
-];
+const fallbackImage =
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=80";
+
+function formatRelativeTime(dateString: string) {
+  const date = new Date(dateString);
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.max(1, Math.floor(diffMs / 60000));
+
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+
+  const diffWeeks = Math.floor(diffDays / 7);
+  return `${diffWeeks} week${diffWeeks === 1 ? "" : "s"} ago`;
+}
+
+const mapIssueRecord = (issue: IssueRecord): IssueItem => {
+  const statusColor =
+    issue.status === "Resolved"
+      ? { bg: "bg-[#f3eee7]", text: "text-[#4a3c2d]", border: "border-[#e5d7ca]" }
+      : issue.status === "Under Review"
+        ? { bg: "bg-[#fef3c7]", text: "text-[#b45309]", border: "border-[#fde68a]" }
+        : { bg: "bg-[#feece2]", text: "text-[#d96515]", border: "border-[#fcd7c3]" };
+
+  const comments = issue.issue_comments?.length ?? 0;
+  const votes = Math.max(1, comments + 1);
+  const filterTags = ["all"];
+
+  if (issue.status !== "Resolved") filterTags.push("nearby");
+  if (issue.status === "Under Review" || comments > 0) filterTags.push("trending");
+  if (issue.status === "Resolved") filterTags.push("resolved");
+
+  return {
+    id: issue.id,
+    title: issue.title,
+    category: issue.category,
+    location: issue.location,
+    time: formatRelativeTime(issue.created_at),
+    votes,
+    comments,
+    status: issue.status,
+    statusColor,
+    image: issue.issue_images?.[0]?.image_url ?? fallbackImage,
+    filterTags: Array.from(new Set(filterTags)),
+  };
+};
 
 export default function HomePage() {
   const router = useRouter();
-  const [issues, setIssues] = useState<IssueItem[]>(INITIAL_ISSUES);
+  const [issues, setIssues] = useState<IssueItem[]>([]);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [upvotedIds, setUpvotedIds] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const loadIssues = async () => {
+      try {
+        const data = await getIssues();
+        setIssues(data.map(mapIssueRecord));
+      } catch (error) {
+        console.error("Failed to load live feed issues:", error);
+        setIssues([]);
+      }
+    };
+
+    void loadIssues();
+  }, []);
 
   const toggleUpvote = (id: string) => {
     setUpvotedIds((prev) => {
@@ -178,169 +132,62 @@ export default function HomePage() {
   }, [issues, activeTab, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#f4f5f3] text-[#0f172a] flex flex-col selection:bg-[#0f5d4a]/20">
+    <div className="min-h-screen bg-transparent text-[var(--foreground)] flex flex-col selection:bg-[var(--primary)]/20">
       {/* Desktop / Mobile Top Navigation */}
       <Navbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
       {/* Main Container */}
       <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-16 pt-4 sm:px-8 lg:px-12">
-        {/* MOBILE VIEW ONLY: Resident Greeting Header & Quick Actions (matching UI/mobile view.png) */}
-        <div className="mb-6 block md:hidden">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold tracking-tight text-[#0f172a] flex items-center gap-1.5">
-                Hello, John <span className="text-xl">👋</span>
-              </h2>
-              <p className="text-xs text-[#6b7280]">
-                Let&apos;s build a better community together.
-              </p>
-            </div>
-          </div>
 
-          <div className="mt-4">
-            <Link
-              href="/report"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0f5d4a] py-3 text-sm font-semibold text-white shadow-sm active:scale-98 transition"
-            >
-              Report an Issue
-            </Link>
-          </div>
 
-          {/* Quick Filter Circles (from UI/mobile view.png) */}
-          <div className="mt-5 grid grid-cols-4 gap-2">
-            {[
-              {
-                id: "nearby",
-                label: "Nearby",
-                icon: (
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                ),
-              },
-              {
-                id: "trending",
-                label: "Trending",
-                icon: (
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                  </svg>
-                ),
-              },
-              {
-                id: "resolved",
-                label: "Resolved",
-                icon: (
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                ),
-              },
-              {
-                id: "all",
-                label: "All Issues",
-                icon: (
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="7" height="7" />
-                    <rect x="14" y="3" width="7" height="7" />
-                    <rect x="14" y="14" width="7" height="7" />
-                    <rect x="3" y="14" width="7" height="7" />
-                  </svg>
-                ),
-              },
-            ].map((item) => {
-              const isSelected = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl p-2 transition ${isSelected
-                    ? "bg-[#e5f1ea] text-[#0f5d4a] font-semibold ring-1 ring-[#0f5d4a]"
-                    : "bg-white text-[#4b5563] shadow-2xs hover:bg-[#eef2ee]"
-                    }`}
-                >
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full ${isSelected ? "bg-[#0f5d4a] text-white" : "bg-[#ecf5f0] text-[#0f5d4a]"
-                      }`}
-                  >
-                    {item.icon}
-                  </div>
-                  <span className="text-[0.72rem]">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* HERO SECTION (Matching UI/home.png exactly) */}
-        <section className="relative grid items-center gap-8 py-4 sm:py-6 lg:grid-cols-12 lg:gap-8 lg:py-10">
-          {/* Left Text Column */}
-          <div className="lg:col-span-6 xl:col-span-6">
-            {/* Tagline Badge */}
-            <div className="inline-flex flex-col rounded-xl bg-[#e3efe7] px-3.5 py-1.5 text-xs font-semibold text-[#0f5d4a] shadow-2xs sm:text-sm">
-              <span>Stronger Communities,</span>
-              <span>Better Tomorrow</span>
-            </div>
-
-            {/* Headline */}
-            <h1 className="mt-4 text-[2.4rem] font-black leading-[1.08] tracking-[-0.04em] text-[#0f172a] sm:text-[3.2rem] lg:text-[3.8rem] xl:text-[4.2rem]">
-              Report Issues.
+        <section className="hero-showcase">
+          <div className="hero-copy">
+            <h1>
+              Report <span className="pl-4 text-[#ee7c2d]">Issues</span>
               <br />
-              Track Progress.
+              <span className="text-[#ee7c2d]">Track</span> <span className="pl-4">Progress</span>
               <br />
-              Make a Difference.
+              <span>Make <span className="pl-4 text-[#ee7c2d]">a</span> </span>
+              <br />
+              <span className="text-[#ee7c2d]">Difference</span>
             </h1>
-
-            {/* Subtext */}
-            <p className="mt-4 max-w-[500px] text-sm leading-relaxed text-[#4b5563] sm:text-base lg:text-[1.05rem]">
-              Help improve your community by reporting issues around you.
-              Together, we can build a safer, cleaner, and better place to live.
+            <p>
+              Help improve your community by reporting issues around you. Together we can build a safer, cleaner, and better place to live.
             </p>
-
-            {/* Action Buttons */}
-            <div className="mt-7 flex flex-wrap items-center gap-3.5">
-              <Link
-                href="/report"
-                className="inline-flex items-center justify-center rounded-xl bg-[#0f5d4a] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0c4c3c] hover:shadow-md active:scale-98 sm:text-base"
-              >
+            <div className="hero-actions">
+              <Link href="/report" className="hero-button">
                 Report an Issue
               </Link>
-              <Link
-                href="/map"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d5ded6] bg-[#f4f5f3] px-6 py-3 text-sm font-semibold text-[#0f172a] transition hover:border-[#0f5d4a] hover:bg-white hover:text-[#0f5d4a] active:scale-98 sm:text-base shadow-2xs"
-              >
-                <span>View Map</span>
-                <svg
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="22" y1="12" x2="18" y2="12" />
-                  <line x1="6" y1="12" x2="2" y2="12" />
-                  <line x1="12" y1="6" x2="12" y2="2" />
-                  <line x1="12" y1="22" x2="12" y2="18" />
-                </svg>
+              <Link href="/map" className="hero-button-secondary">
+                View Map
               </Link>
             </div>
           </div>
 
-          {/* Right Hero Illustration (Clean, crisp, no CSS clutter) */}
-          <div className="relative flex items-center justify-center lg:col-span-6 xl:col-span-6">
-            <div className="relative w-full max-w-[620px]">
-              <img
-                src="/hero-image.png"
-                alt="Community members reporting issues on smartphone with map pin illustration"
-                className="h-auto w-full object-contain drop-shadow-xs transition duration-500 hover:scale-[1.01]"
-                loading="eager"
-              />
+          <div className="hero-art" aria-label="Robot illustration">
+            <div className="hero-tools" />
+            <div className="robot-scene">
+              <div className="hero-float-card sm-hidden md:hidden">
+                <div className="hero-stat">
+                  <strong>132%</strong>
+                  <small>growth</small>
+                </div>
+                <p>Stronger Communities, Better Tomorrow</p>
+              </div>
+
+              <div className="robot-chip" />
+              <div className="robot-chip" />
+              <div className="robot-chip" />
+
+              <div className="robot-terminal">
+                <div className="robot-camera" />
+                <div className="robot-screen" />
+                <div className="robot-keyboard" />
+              </div>
             </div>
+
+            <div className="hero-name">PLATFORM</div>
+            <div className="hero-tilt">CIRP</div>
           </div>
         </section>
 
@@ -354,8 +201,8 @@ export default function HomePage() {
                   Live Feed
                 </h2>
                 <span className="relative flex h-3 w-3" title="Live updates active">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#0f5d4a] opacity-75"></span>
-                  <span className="relative inline-flex h-3 w-3 rounded-full bg-[#0f5d4a]"></span>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ee7c2d] opacity-75"></span>
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-[#ee7c2d]"></span>
                 </span>
               </div>
               <p className="mt-0.5 text-xs text-[#6b7280] sm:text-sm">
@@ -376,7 +223,7 @@ export default function HomePage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`rounded-full px-3.5 py-1 text-xs font-medium transition ${activeTab === tab.id
-                      ? "bg-[#0f5d4a] text-white shadow-2xs"
+                      ? "bg-[#ee7c2d] text-white shadow-2xs"
                       : "text-[#4b5563] hover:text-[#0f172a]"
                       }`}
                   >
@@ -387,7 +234,7 @@ export default function HomePage() {
 
               <Link
                 href="/issues"
-                className="inline-flex items-center gap-1 text-sm font-semibold text-[#0f5d4a] hover:underline"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-[#ee7c2d] hover:underline"
               >
                 <span>View All Issues</span>
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -400,8 +247,8 @@ export default function HomePage() {
 
           {/* Issue Cards: Desktop Grid (matching UI/home.png) & Mobile Horizontal Cards (matching UI/mobile view.png) */}
           {filteredIssues.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[#cbd5e1] bg-white p-10 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#eaf4ef] text-[#0f5d4a]">
+            <div className="rounded-[28px] border border-white/40 bg-white/20 p-10 text-center shadow-[0_20px_60px_rgba(15,16,19,0.08)] backdrop-blur-xl">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#fff3e8] text-[#ee7c2d]">
                 <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="11" cy="11" r="8" />
                   <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -430,7 +277,7 @@ export default function HomePage() {
                       }}
                       tabIndex={0}
                       role="button"
-                      className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[#e2e6e1] bg-white p-2.5 shadow-2xs transition active:scale-99 focus:outline-none focus:ring-2 focus:ring-[#0f5d4a]/20"
+                      className="flex cursor-pointer items-center gap-3 rounded-[26px] border border-white/50 bg-white/25 p-2.5 shadow-[0_18px_45px_rgba(15,16,19,0.08)] backdrop-blur-xl transition duration-200 active:scale-[0.99] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#ee7c2d]/30"
                     >
                       {/* Left Thumbnail */}
                       <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-[#e5e7eb]">
@@ -518,7 +365,7 @@ export default function HomePage() {
                       }}
                       tabIndex={0}
                       role="button"
-                      className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#e2e6e1] bg-white shadow-xs transition duration-200 hover:-translate-y-1 hover:border-[#0f5d4a]/30 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#0f5d4a]/20"
+                      className="group flex cursor-pointer flex-col overflow-hidden rounded-[28px] border border-white/50 bg-white/25 shadow-[0_20px_60px_rgba(15,16,19,0.08)] backdrop-blur-xl transition duration-200 hover:-translate-y-1 hover:border-[#ee7c2d]/40 hover:shadow-[0_25px_65px_rgba(238,124,45,0.16)] focus:outline-none focus:ring-2 focus:ring-[#ee7c2d]/30"
                     >
                       {/* Card Media with Status Badge */}
                       <div className="relative h-44 w-full overflow-hidden bg-[#e5e7eb]">
@@ -528,8 +375,7 @@ export default function HomePage() {
                           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                           loading="lazy"
                         />
-                        {/* Gradient overlay for text contrast */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent" />
 
                         {/* Status Badge */}
                         <span
@@ -542,14 +388,14 @@ export default function HomePage() {
                       {/* Card Content */}
                       <div className="flex flex-1 flex-col justify-between p-4">
                         <div>
-                          <h3 className="text-base font-bold tracking-tight text-[#0f172a] group-hover:text-[#0f5d4a] transition">
+                          <h3 className="text-base font-bold tracking-tight text-[#0f172a] group-hover:text-[#ee7c2d] transition">
                             {issue.title}
                           </h3>
 
                           {/* Location */}
                           <div className="mt-1.5 flex items-center gap-1.5 text-xs text-[#525d6f]">
                             <svg
-                              className="h-3.5 w-3.5 flex-shrink-0 text-[#0f5d4a]"
+                              className="h-3.5 w-3.5 flex-shrink-0 text-[#ee7c2d]"
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
@@ -565,7 +411,7 @@ export default function HomePage() {
                         </div>
 
                         {/* Card Footer: Timestamp, Upvotes & Comments */}
-                        <div className="mt-4 flex items-center justify-between border-t border-[#f0f2ef] pt-3 text-xs text-[#717b8a]">
+                        <div className="mt-4 flex items-center justify-between border-t border-white/60 pt-3 text-xs text-[#717b8a]">
                           <span className="font-medium">{issue.time}</span>
 
                           <div className="flex items-center gap-3">
@@ -625,9 +471,6 @@ export default function HomePage() {
 
       {/* Footer */}
       <Footer />
-
-      {/* Mobile Bottom Navigation Bar (matches UI/mobile view.png) */}
-      <MobileBottomNav />
     </div>
   );
 }

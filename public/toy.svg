@@ -1,0 +1,32 @@
+<svg viewBox="0 0 520 430" className="auth-illustration" aria-label="Illustrated robot mascot">
+    <defs>
+        <linearGradient id="robotBody" x1="0%" x2="100%" y1="0%" y2="100%">
+            <stop offset="0%" stopColor="#fdf1d6" />
+            <stop offset="100%" stopColor="#f0a546" />
+        </linearGradient>
+        <linearGradient id="visor" x1="0%" x2="100%" y1="0%" y2="100%">
+            <stop offset="0%" stopColor="#f4d9ce" />
+            <stop offset="100%" stopColor="#f6adc3" />
+        </linearGradient>
+    </defs>
+    <path d="M125 190C125 130 172 96 239 96H309C385 96 430 146 430 212V286C430 343 390 384 331 384H196C146 384 116 353 116 305V266C116 233 125 190 125 190Z" fill="#f6ba6d" stroke="#2c2c2c" strokeWidth="5" />
+    <path d="M165 150C176 120 217 97 258 97H282C330 97 366 120 382 150L410 202L365 226L335 174C320 185 298 193 270 193H263C230 193 202 185 185 176L170 207L130 200L165 150Z" fill="#f5d18d" stroke="#2c2c2c" strokeWidth="5" />
+    <path d="M164 152h210l-24 124H185L164 152Z" fill="#f1d69e" stroke="#2c2c2c" strokeWidth="5" />
+    <rect x="180" y="178" width="160" height="80" rx="18" fill="url(#visor)" stroke="#2c2c2c" strokeWidth="5" />
+    <rect x="196" y="196" width="128" height="48" rx="10" fill="#c5e6f7" stroke="#2c2c2c" strokeWidth="5" />
+    <rect x="214" y="205" width="36" height="18" rx="9" fill="#ffedd5" stroke="#2c2c2c" strokeWidth="4" />
+    <rect x="267" y="205" width="36" height="18" rx="9" fill="#ffedd5" stroke="#2c2c2c" strokeWidth="4" />
+    <path d="M241 270C252 277 260 280 277 280C286 280 296 278 306 272" stroke="#2c2c2c" strokeWidth="5" strokeLinecap="round" fill="none" />
+    <circle cx="220" cy="300" r="14" fill="#f7d2d8" stroke="#2c2c2c" strokeWidth="4" />
+    <circle cx="304" cy="300" r="14" fill="#f7d2d8" stroke="#2c2c2c" strokeWidth="4" />
+    <path d="M182 210L130 235C105 248 92 273 92 304V328C92 351 110 367 134 367H158L183 335L195 247L182 210Z" fill="#e19d53" stroke="#2c2c2c" strokeWidth="5" />
+    <path d="M340 210L390 240C417 255 432 279 432 307V334C432 355 416 371 393 371H368L345 338L335 250L340 210Z" fill="#e19d53" stroke="#2c2c2c" strokeWidth="5" />
+    <circle cx="76" cy="318" r="22" fill="#f0b4aa" stroke="#2c2c2c" strokeWidth="5" />
+    <path d="M76 315L48 345" stroke="#2c2c2c" strokeWidth="6" strokeLinecap="round" />
+    <path d="M440 315L469 344" stroke="#2c2c2c" strokeWidth="6" strokeLinecap="round" />
+    <path d="M98 371C123 349 163 344 198 354L173 414H128L98 371Z" fill="#e3a86b" stroke="#2c2c2c" strokeWidth="5" />
+    <path d="M321 357L350 416H297L276 355L321 357Z" fill="#e3a86b" stroke="#2c2c2c" strokeWidth="5" />
+    <rect x="147" y="352" width="230" height="24" rx="12" fill="#f4c986" stroke="#2c2c2c" strokeWidth="5" />
+    <circle cx="270" cy="365" r="28" fill="#f9d7d8" stroke="#2c2c2c" strokeWidth="5" />
+    <path d="M263 364C267 371 275 374 282 372" stroke="#2c2c2c" strokeWidth="4" strokeLinecap="round" fill="none" />
+</svg>

@@ -69,27 +69,15 @@ export default function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
   const isSignedIn = Boolean(user);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#e5e8e4] bg-[#f4f5f3]/95 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-40 border-b border-[rgba(17,17,17,0.08)] bg-[rgba(255,255,255,0.3)] backdrop-blur-xl transition-colors">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 py-3.5 sm:px-8 lg:px-12">
         <Link href="/" className="group flex items-center gap-2.5 sm:gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0f5d4a] bg-[#eaf4ef] text-[#0f5d4a] shadow-sm transition group-hover:scale-105">
-            <svg
-              className="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#0f5d4a"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              <circle cx="11" cy="11" r="2.5" fill="#0f5d4a" />
-            </svg>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#ee7c2d] bg-[rgba(255,255,255,0.45)] text-[var(--primary-strong)] shadow-sm transition group-hover:scale-105">
+            <img src="/logo.svg" alt="CIRP logo" className="h-5 w-5" />
           </div>
           <div className="leading-tight">
-            <div className="text-[1.22rem] font-black tracking-tight text-[#0f5d4a]">CIRP</div>
-            <div className="hidden text-[0.68rem] font-medium leading-[1.15] text-[#4b5563] sm:block">
+            <div className="text-[1.22rem] font-black tracking-tight text-[var(--foreground)]">CIRP</div>
+            <div className="hidden text-[0.68rem] font-medium leading-[1.15] text-[var(--muted)] sm:block">
               Community Issues
               <br />
               Report Platform
@@ -97,16 +85,16 @@ export default function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Main Navigation">
+        <nav className="hidden items-center gap-2 rounded bg-[rgba(17,17,17,0.05)] p-1 md:flex" aria-label="Main Navigation">
           {navLinks.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                className={`relative py-1 text-[0.96rem] font-medium transition hover:text-[#0f5d4a] ${isActive
-                  ? "font-semibold text-[#0f5d4a] after:absolute after:bottom-[-2px] after:left-0 after:h-[2.5px] after:w-full after:rounded-full after:bg-[#0f5d4a]"
-                  : "text-[#4b5563]"
+                className={`rounded px-4 py-2 text-[0.9rem] font-medium transition ${isActive
+                  ? "bg-[rgba(17,17,17,0.08)] text-[var(--foreground)] shadow-sm"
+                  : "text-[var(--muted)] hover:text-[var(--foreground)]"
                   }`}
               >
                 {item.label}
@@ -137,13 +125,13 @@ export default function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
               placeholder="Search issues, categories, or locations..."
               value={searchQuery ?? ""}
               onChange={(e) => onSearchChange?.(e.target.value)}
-              className="w-full rounded-full border border-[#d8dcd6] bg-white py-2 pl-9 pr-8 text-sm text-[#0f172a] placeholder:text-[#8d95a5] shadow-xs transition focus:border-[#0f5d4a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f5d4a]/20"
+              className="w-full rounded border border-[rgba(73,86,125,0.16)] bg-white/80 py-2 pl-9 pr-8 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] shadow-xs transition focus:border-[var(--primary)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
             />
           </div>
         </div>
 
         <div className="flex items-center gap-2.5 sm:gap-3">
-          <Link
+          {/* <Link
             href="/dashboard"
             className="relative flex md:hidden h-9 w-9 items-center justify-center rounded-full border border-[#dce0da] bg-white text-[#374151] hover:bg-[#edf2ee] transition"
             aria-label="Open dashboard"
@@ -161,41 +149,41 @@ export default function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
               <path d="M3 6h18" />
               <path d="M3 18h18" />
             </svg>
-          </Link>
+          </Link> */}
 
           {isSignedIn ? (
             <Link
               href="/dashboard"
               aria-label="Open dashboard"
-              className="flex items-center gap-2 rounded-full border border-[#dfe6e2] bg-white px-2 py-1.5 shadow-sm transition hover:border-[#0f5d4a] hover:shadow-md"
+              className="flex items-center gap-2 rounded-full border border-[rgba(73,86,125,0.16)] bg-white/80 px-2 py-1.5 shadow-sm transition hover:border-[var(--primary)] hover:shadow-md"
             >
-              <div className="h-8 w-8 overflow-hidden rounded-full border border-[#dfe4de] bg-[#eaf4ef] text-[#0f5d4a]">
+              <div className="h-8 w-8 overflow-hidden rounded-full border border-[rgba(73,86,125,0.14)] bg-[rgba(234,220,197,0.7)] text-[var(--primary)]">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-[0.72rem] font-bold">{initials}</div>
                 )}
               </div>
-              <span className="hidden xl:inline text-sm font-semibold text-[#0f172a]">{name}</span>
+              <span className="hidden xl:inline text-sm font-semibold text-[var(--foreground)]">{name}</span>
             </Link>
           ) : (
             <div className="hidden sm:flex items-center gap-2.5">
               <Link
                 href="/login"
-                className="rounded-full border border-[#d5dad3] bg-white/80 px-4 py-1.5 text-sm font-medium text-[#1e293b] shadow-xs transition hover:border-[#0f5d4a] hover:bg-white hover:text-[#0f5d4a]"
+                className="rounded border border-[rgba(73,86,125,0.12)] bg-black text-white/70 px-4 py-1.5 text-sm font-medium shadow-xs transition hover:border-[var(--primary)] hover:bg-white hover:text-[var(--primary)]"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="rounded-full bg-[#0f5d4a] px-4.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0c4c3c] hover:shadow-md active:scale-98"
+                className="rounded bg-[linear-gradient(135deg,var(--primary),var(--primary-strong))] px-4.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-105 hover:shadow-md active:scale-98"
               >
                 Register
               </Link>
             </div>
           )}
 
-          <button
+          {/* <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex md:hidden h-9 w-9 items-center justify-center rounded-full border border-[#dce0da] bg-white text-[#374151] hover:bg-[#edf2ee] transition"
@@ -214,7 +202,7 @@ export default function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
                 <line x1="4" y1="18" x2="20" y2="18" />
               </svg>
             )}
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -243,8 +231,8 @@ export default function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
                 key={item.label}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${pathname === item.href
-                  ? "bg-[#e5f0e9] font-semibold text-[#0f5d4a]"
+                className={`rounded px-3 py-2 text-sm font-medium transition ${pathname === item.href
+                  ? "bg-[#e5f0e9] font-semibold text-[#ee7c2d]"
                   : "text-[#374151] hover:bg-[#e9ece8]"
                   }`}
               >

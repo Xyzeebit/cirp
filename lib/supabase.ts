@@ -148,6 +148,7 @@ export async function uploadIssueImages(issueId: string, files: File[]) {
   if (validFiles.length !== files.length) throw new Error("Each image must be 5MB or smaller.");
 
   const uploadedUrls: string[] = [];
+  const rowsToInsert: Array<{ issue_id: string; image_url: string; storage_path: string }> = [];
 
   for (const file of validFiles) {
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name.replace(/\s+/g, "-")}`;
@@ -158,19 +159,23 @@ export async function uploadIssueImages(issueId: string, files: File[]) {
       upsert: false,
     });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error("Issue image upload failed:", uploadError);
+      throw new Error(
+        "Image upload failed. Please make sure the Supabase storage bucket 'cirp-images' exists and is configured for public reads."
+      );
+    }
 
     const { data } = supabase.storage.from("cirp-images").getPublicUrl(storagePath);
     uploadedUrls.push(data.publicUrl);
+    rowsToInsert.push({
+      issue_id: issueId,
+      image_url: data.publicUrl,
+      storage_path: storagePath,
+    });
   }
 
-  const { error: imageInsertError } = await supabase.from("issue_images").insert(
-    uploadedUrls.map((imageUrl) => ({
-      issue_id: issueId,
-      image_url: imageUrl,
-      storage_path: imageUrl,
-    }))
-  );
+  const { error: imageInsertError } = await supabase.from("issue_images").insert(rowsToInsert);
 
   if (imageInsertError) throw imageInsertError;
   return uploadedUrls;

@@ -152,7 +152,7 @@ export default function IssuesPage() {
     }, [activeTab, category, issues, searchQuery, sortBy]);
 
     return (
-        <div className="min-h-screen bg-[#f4f5f3] text-[#0f172a]">
+        <div className="min-h-screen bg-transparent text-[var(--foreground)]">
             <Navbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
             <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 pb-16 pt-6 sm:px-6 lg:px-8">
@@ -185,8 +185,8 @@ export default function IssuesPage() {
                                     type="button"
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition sm:text-sm ${isActive
-                                        ? "border-[#0f5d4a] bg-[#0f5d4a] text-white shadow-sm"
-                                        : "border-[#dfe3de] bg-[#f7f8f7] text-[#4b5563] hover:border-[#cfe3d8] hover:text-[#0f5d4a]"
+                                        ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm"
+                                        : "border-[var(--border)] bg-[var(--surface-strong)] text-[var(--muted)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
                                         }`}
                                 >
                                     {tab.label}
@@ -208,7 +208,7 @@ export default function IssuesPage() {
                                 placeholder="Search issues..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full rounded-lg border border-[#d8dcd6] bg-[#f9faf9] py-2.5 pl-9 pr-3 text-sm text-[#0f172a] placeholder:text-[#8d95a5] outline-none transition focus:border-[#0f5d4a] focus:bg-white focus:ring-2 focus:ring-[#0f5d4a]/15"
+                                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] py-2.5 pl-9 pr-3 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] outline-none transition focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[var(--primary)]/15"
                             />
                         </div>
 
