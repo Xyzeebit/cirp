@@ -7,7 +7,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { addIssueComment, getIssueById, type IssueCommentRecord, type IssueRecord } from "@/lib/supabase";
+import { addIssueComment, getIssueById, parseLocation, type IssueCommentRecord, type IssueRecord } from "@/lib/supabase";
 
 const statusClasses: Record<IssueRecord["status"], string> = {
     Submitted: "bg-[#fff2e8] text-[#ee7c2d] border border-[#f9d2b1]",
@@ -84,6 +84,7 @@ export default function IssueDetailPage() {
         [issue]
     );
     const hasLocationCoords = issue ? issue.lat != null && issue.lng != null : false;
+    const parsedLocation = useMemo(() => (issue ? parseLocation(issue.location) : { address: "", coords: null }), [issue]);
     const wasSubmitted = searchParams.get("submitted") === "1";
 
     useEffect(() => {
@@ -194,7 +195,7 @@ export default function IssueDetailPage() {
                         </div>
 
                         <div className="mt-4 flex flex-wrap gap-4 text-sm text-[#4b5563]">
-                            <span>{issue.location}</span>
+                            <span>{parsedLocation.address}{parsedLocation.coords ? ` (${parsedLocation.coords})` : ""}</span>
                             <span>•</span>
                             <span>{new Date(issue.created_at).toLocaleString()}</span>
                             <span>•</span>
@@ -263,7 +264,12 @@ export default function IssueDetailPage() {
                                 </li>
                                 <li className="flex items-center justify-between rounded-2xl bg-[#fffaf5] px-3 py-2.5">
                                     <span>Location</span>
-                                    <span className="font-semibold text-[#111111]">{issue.location}</span>
+                                    <span className="text-right font-semibold text-[#111111]">
+                                        {parsedLocation.address}
+                                        {parsedLocation.coords && (
+                                            <span className="block text-xs font-normal text-[#64748b]">{parsedLocation.coords}</span>
+                                        )}
+                                    </span>
                                 </li>
                                 {issue.contact_info ? (
                                     <li className="flex items-center justify-between rounded-2xl bg-[#fffaf5] px-3 py-2.5">

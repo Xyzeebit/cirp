@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { MapIssue, CATEGORY_COLORS } from "@/components/IssueMap";
+import { getIssues, parseLocation, type IssueRecord } from "@/lib/supabase";
 
 // Dynamically import Leaflet IssueMap to avoid SSR 'window is not defined'
 const IssueMap = dynamic(() => import("@/components/IssueMap"), {
@@ -18,134 +19,55 @@ const IssueMap = dynamic(() => import("@/components/IssueMap"), {
   ),
 });
 
-const INITIAL_MAP_ISSUES: MapIssue[] = [
+const FALLBACK_MAP_ISSUES: MapIssue[] = [
   {
-    id: "1",
-    title: "Bad Road / Pothole",
-    category: "Bad Road / Pothole",
-    location: "Unity Road, GRA, Uyo",
-    lat: 6.4535,
-    lng: 7.5098,
+    id: "fallback-1",
+    title: "Sample Issue",
+    category: "Others",
+    location: "Uyo, Akwa Ibom",
+    lat: 5.037,
+    lng: 7.926,
     status: "Submitted",
-    time: "10 mins ago",
-    votes: 12,
-    comments: 3,
+    time: "Recently",
+    votes: 0,
+    comments: 0,
     image:
       "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80",
   },
-  {
-    id: "2",
-    title: "Broken Streetlight",
-    category: "Broken Streetlight",
-    location: "Park Avenue, GRA, Uyo",
-    lat: 6.462,
-    lng: 7.518,
-    status: "Under Review",
-    time: "30 mins ago",
-    votes: 8,
-    comments: 1,
-    image:
-      "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "3",
-    title: "Flooding",
-    category: "Flooding",
-    location: "Ewet Housing Estate, Uyo",
-    lat: 6.435,
-    lng: 7.531,
-    status: "Submitted",
-    time: "2 hours ago",
-    votes: 20,
-    comments: 6,
-    image:
-      "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "4",
-    title: "Waste Disposal",
-    category: "Waste Disposal",
-    location: "Nwaniba, Uyo",
-    lat: 6.478,
-    lng: 7.536,
-    status: "Submitted",
-    time: "1 hour ago",
-    votes: 15,
-    comments: 2,
-    image:
-      "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "5",
-    title: "Water Shortage",
-    category: "Water Shortage",
-    location: "Nka, Uyo",
-    lat: 6.4445,
-    lng: 7.5215,
-    status: "Resolved",
-    time: "1 day ago",
-    votes: 16,
-    comments: 4,
-    image:
-      "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "6",
-    title: "Power Grid Instability",
-    category: "Power / Electricity",
-    location: "Itam, Uyo",
-    lat: 6.426,
-    lng: 7.498,
-    status: "Under Review",
-    time: "3 hours ago",
-    votes: 24,
-    comments: 9,
-    image:
-      "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "7",
-    title: "Security Concern",
-    category: "Security Concern",
-    location: "Ikot Ekpene Road, Uyo",
-    lat: 6.442,
-    lng: 7.502,
-    status: "Submitted",
-    time: "4 hours ago",
-    votes: 31,
-    comments: 14,
-    image:
-      "https://images.unsplash.com/photo-1509744645300-a2098b11871a?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "8",
-    title: "Overgrown Bushes & Blocked Drain",
-    category: "Others",
-    location: "Nsukara Offot, Uyo",
-    lat: 6.467,
-    lng: 7.493,
-    status: "Resolved",
-    time: "2 days ago",
-    votes: 9,
-    comments: 2,
-    image:
-      "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "9",
-    title: "Streetlight outage",
-    category: "Broken Streetlight",
-    location: "Udo Udoma, Uyo",
-    lat: 6.418,
-    lng: 7.505,
-    status: "Submitted",
-    time: "5 hours ago",
-    votes: 11,
-    comments: 3,
-    image:
-      "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=600&q=80",
-  },
 ];
+
+function formatRelativeTime(isoDate: string): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days > 1 ? "s" : ""} ago`;
+}
+
+function toMapIssue(issue: IssueRecord): MapIssue | null {
+  const lat = issue.lat;
+  const lng = issue.lng;
+  if (lat == null || lng == null) return null;
+
+  return {
+    id: issue.id,
+    title: issue.title,
+    category: issue.category as MapIssue["category"],
+    location: parseLocation(issue.location).address || issue.location,
+    lat,
+    lng,
+    status: issue.status,
+    time: formatRelativeTime(issue.created_at),
+    votes: 0,
+    comments: issue.issue_comments?.length ?? 0,
+    image:
+      issue.issue_images?.[0]?.image_url ??
+      "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80",
+  };
+}
 
 const ALL_CATEGORIES: MapIssue["category"][] = [
   "Bad Road / Pothole",
@@ -159,7 +81,7 @@ const ALL_CATEGORIES: MapIssue["category"][] = [
 ];
 
 export default function MapPage() {
-  const [issues, setIssues] = useState<MapIssue[]>(INITIAL_MAP_ISSUES);
+  const [issues, setIssues] = useState<MapIssue[]>(FALLBACK_MAP_ISSUES);
   const [selectedCategory, setSelectedCategory] = useState<string>("All Categories");
   const [selectedStatuses, setSelectedStatuses] = useState<Record<string, boolean>>({
     "Submitted": true,
@@ -170,6 +92,26 @@ export default function MapPage() {
   const [selectedIssue, setSelectedIssue] = useState<MapIssue | null>(null);
   const [userUpvoted, setUserUpvoted] = useState<Record<string, boolean>>({});
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadIssues = async () => {
+      try {
+        const dbIssues = await getIssues();
+        const mapped = dbIssues
+          .map(toMapIssue)
+          .filter((issue): issue is MapIssue => issue !== null);
+        if (mapped.length > 0) {
+          setIssues(mapped);
+        }
+      } catch (error) {
+        console.error("Failed to load map issues:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadIssues();
+  }, []);
 
   // Toggle status filter
   const toggleStatus = (statusName: string) => {

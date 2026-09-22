@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { MAX_IMAGE_SIZE_BYTES, MAX_ISSUE_IMAGES, createIssueEntry } from "@/lib/supabase";
+import { MAX_IMAGE_SIZE_BYTES, MAX_ISSUE_IMAGES, createIssueEntry, formatLocation } from "@/lib/supabase";
 
 const DEFAULT_COORDS = { lat: 5.037, lng: 7.926 };
 
@@ -18,6 +18,7 @@ export default function ReportPage() {
     const [title, setTitle] = useState("");
     const [category, setCategory] = useState("");
     const [description, setDescription] = useState("");
+    const [locationAddress, setLocationAddress] = useState("");
     const [location, setLocation] = useState(formatCoords(DEFAULT_COORDS));
     const [contactInfo, setContactInfo] = useState("");
     const [anonymous, setAnonymous] = useState(false);
@@ -30,7 +31,6 @@ export default function ReportPage() {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<maplibregl.Map | null>(null);
     const markerRef = useRef<maplibregl.Marker | null>(null);
-    const locationInputRef = useRef<HTMLInputElement>(null);
 
     const photoCount = useMemo(() => selectedFiles.length, [selectedFiles]);
     const previewUrls = useMemo(() => selectedFiles.slice(0, MAX_ISSUE_IMAGES).map((file) => URL.createObjectURL(file)), [selectedFiles]);
@@ -39,9 +39,6 @@ export default function ReportPage() {
         const formatted = formatCoords(coords);
         setSelectedLocation(coords);
         setLocation(formatted);
-        if (locationInputRef.current) {
-            locationInputRef.current.value = formatted;
-        }
     };
 
     useEffect(() => {
@@ -185,7 +182,7 @@ export default function ReportPage() {
         setErrorMessage("");
         setSuccessMessage("");
 
-        if (!title.trim() || !category || !description.trim() || !location.trim()) {
+        if (!title.trim() || !category || !description.trim() || !locationAddress.trim()) {
             setErrorMessage("Please complete the required fields before submitting.");
             return;
         }
@@ -202,7 +199,7 @@ export default function ReportPage() {
                 title,
                 category,
                 description,
-                location,
+                location: formatLocation(locationAddress, location),
                 lat: selectedLocation.lat,
                 lng: selectedLocation.lng,
                 contactInfo,
@@ -272,14 +269,19 @@ export default function ReportPage() {
                         </div>
 
                         <div>
-                            <label htmlFor="location" className="mb-2 block text-sm font-semibold text-[#0f172a]">Location Address <span className="text-[#ef4444]">*</span></label>
+                            <label htmlFor="locationAddress" className="mb-2 block text-sm font-semibold text-[#0f172a]">Location Address <span className="text-[#ef4444]">*</span></label>
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                                <input ref={locationInputRef} id="location" type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Enter address manually or use a selected location" className="w-full rounded-xl border border-[#d8dcd6] bg-[#f9faf9] px-3.5 py-3 text-sm text-[#0f172a] placeholder:text-[#94a3b8] outline-none transition focus:border-[#0f5d4a] focus:bg-white focus:ring-2 focus:ring-[#0f5d4a]/15" />
+                                <input id="locationAddress" type="text" value={locationAddress} onChange={(e) => setLocationAddress(e.target.value)} placeholder="e.g. 123 Fake Street, Owerri" className="w-full rounded-xl border border-[#d8dcd6] bg-[#f9faf9] px-3.5 py-3 text-sm text-[#0f172a] placeholder:text-[#94a3b8] outline-none transition focus:border-[#0f5d4a] focus:bg-white focus:ring-2 focus:ring-[#0f5d4a]/15" />
                                 <button type="button" onClick={handleDetectLocation} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#cfe3d8] bg-[#eaf4ef] px-3 py-3 text-sm font-semibold text-[#0f5d4a] transition hover:bg-[#dfeee8]">
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
                                     Detect My Location
                                 </button>
                             </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="locationCoords" className="mb-2 block text-sm font-semibold text-[#64748b]">GPS Coordinates <span className="text-xs font-normal text-[#94a3b8]">(auto-detected from map pin)</span></label>
+                            <input id="locationCoords" type="text" value={location} readOnly className="w-full cursor-not-allowed rounded-xl border border-[#d8dcd6] bg-[#f0f0ee] px-3.5 py-3 text-sm text-[#64748b] outline-none" />
                         </div>
 
                         <div className="rounded-2xl border border-[#dfe4de] bg-[#f3f6f3] p-2 sm:p-3">

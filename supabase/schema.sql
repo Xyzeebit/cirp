@@ -75,4 +75,23 @@ for each row
 execute function public.handle_updated_at();
 
 -- Storage bucket used for issue media
--- create bucket cirp-images with public=true;
+insert into storage.buckets (id, name, public)
+values ('cirp-images', 'cirp-images', true)
+on conflict (id) do nothing;
+
+-- Storage policies: allow anyone to upload (insert) and everyone to read
+create policy "Anyone can upload to cirp-images" on storage.objects
+  for insert to anon, authenticated
+  with check (bucket_id = 'cirp-images');
+
+create policy "Anyone can read cirp-images" on storage.objects
+  for select to anon, authenticated
+  using (bucket_id = 'cirp-images');
+
+create policy "Anyone can update cirp-images" on storage.objects
+  for update to anon, authenticated
+  using (bucket_id = 'cirp-images');
+
+create policy "Anyone can delete cirp-images" on storage.objects
+  for delete to anon, authenticated
+  using (bucket_id = 'cirp-images');

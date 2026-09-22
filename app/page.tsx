@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getIssues, type IssueRecord } from "@/lib/supabase";
+import { getIssues, parseLocation, type IssueRecord } from "@/lib/supabase";
 
 interface IssueItem {
   id: string;
@@ -65,7 +65,7 @@ const mapIssueRecord = (issue: IssueRecord): IssueItem => {
     id: issue.id,
     title: issue.title,
     category: issue.category,
-    location: issue.location,
+    location: parseLocation(issue.location).address,
     time: formatRelativeTime(issue.created_at),
     votes,
     comments,

@@ -2,6 +2,37 @@ import { createBrowserClient } from "@supabase/ssr";
 
 export type IssueStatus = "Submitted" | "Under Review" | "Resolved";
 
+export type ParsedLocation = {
+  address: string;
+  coords: string | null;
+};
+
+/**
+ * Parses a combined location string like "123 Fake Street [14.40000, 12.45000]"
+ * into its address and coordinate parts. Falls back to treating the entire
+ * string as the address when no coordinate bracket is found (legacy entries).
+ */
+export function parseLocation(location: string): ParsedLocation {
+  const match = location.match(/^(.*?)\s*\[(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)\]\s*$/);
+  if (match) {
+    return {
+      address: match[1].trim(),
+      coords: `${match[2]}, ${match[3]}`,
+    };
+  }
+  return { address: location.trim(), coords: null };
+}
+
+/**
+ * Combines an address and coordinate string into the stored format:
+ * "123 Fake Street [14.40000, 12.45000]".
+ */
+export function formatLocation(address: string, coords: string | null): string {
+  const trimmed = address.trim();
+  if (!coords) return trimmed;
+  return `${trimmed} [${coords}]`;
+}
+
 export type IssueImageRecord = {
   id: string;
   issue_id: string;
@@ -162,7 +193,7 @@ export async function uploadIssueImages(issueId: string, files: File[]) {
     if (uploadError) {
       console.error("Issue image upload failed:", uploadError);
       throw new Error(
-        "Image upload failed. Please make sure the Supabase storage bucket 'cirp-images' exists and is configured for public reads."
+        `Image upload failed: ${uploadError.message}. Please make sure the Supabase storage bucket 'cirp-images' exists, is public, and has an INSERT storage policy allowing uploads.`
       );
     }
 

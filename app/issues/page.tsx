@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getIssues, type IssueRecord } from "@/lib/supabase";
+import { getIssues, parseLocation, type IssueRecord } from "@/lib/supabase";
 
 interface IssueItem {
     id: string;
@@ -77,7 +77,7 @@ function mapIssueRecord(issue: IssueRecord): IssueItem {
         title: issue.title,
         category: issue.category,
         description: issue.description,
-        location: issue.location,
+        location: parseLocation(issue.location).address,
         createdAt: issue.created_at,
         time: formatRelativeTime(issue.created_at),
         votes,
