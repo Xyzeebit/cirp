@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -28,55 +29,63 @@ export interface MapIssue {
 
 export const CATEGORY_COLORS: Record<
   MapIssue["category"],
-  { pinColor: string; bg: string; text: string; icon: string }
+  { pinColor: string; bg: string; text: string; icon: string; svg: string }
 > = {
   "Bad Road / Pothole": {
     pinColor: "#ef4444",
     bg: "bg-red-50",
     text: "text-red-700",
-    icon: "🕳️",
+    icon: "Pothole",
+    svg: '<path d="M12 3C8 3 5 6 5 10c0 3 2 5 3 7 1 2 2 3 4 3s3-1 4-3c1-2 3-4 3-7 0-4-3-7-7-7zm0 3a3 3 0 0 1 3 3c0 1.5-1.5 2.5-3 2.5S9 10.5 9 9a3 3 0 0 1 3-3z"/>',
   },
   "Broken Streetlight": {
     pinColor: "#f59e0b",
     bg: "bg-amber-50",
     text: "text-amber-700",
-    icon: "💡",
+    icon: "Streetlight",
+    svg: '<path d="M12 2a1 1 0 0 1 1 1v2h3a1 1 0 0 1 1 1v4a3 3 0 0 1-3 3h-1v3h4a1 1 0 0 1 0 2H6a1 1 0 0 1 0-2h4v-3H9a3 3 0 0 1-3-3V6a1 1 0 0 1 1-1h4V3a1 1 0 0 1 1-1zm4 4H8v4a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6z"/>',
   },
   "Flooding": {
     pinColor: "#10b981",
     bg: "bg-emerald-50",
     text: "text-emerald-700",
-    icon: "🌊",
+    icon: "Flooding",
+    svg: '<path d="M2 18c1 0 1.5-1 2-1s1 1 2 1 1.5-1 2-1 1 1 2 1 1.5-1 2-1 1 1 2 1 1.5-1 2-1 1 1 2 1v2c-1 0-1.5 1-2 1s-1-1-2-1-1.5 1-2 1-1-1-2-1-1.5 1-2 1-1-1-2-1-1.5 1-2 1-1-1-2-1v-2zm0-5c1 0 1.5-1 2-1s1 1 2 1 1.5-1 2-1 1 1 2 1 1.5-1 2-1 1 1 2 1 1.5-1 2-1 1 1 2 1v2c-1 0-1.5 1-2 1s-1-1-2-1-1.5 1-2 1-1-1-2-1-1.5 1-2 1-1-1-2-1-1.5 1-2 1-1-1-2-1v-2zM5 8a7 7 0 1 1 14 0c0 2-1 3-2 3s-2-1-2-3a3 3 0 0 0-6 0c0 2-1 3-2 3s-2-1-2-3z"/>',
   },
   "Waste Disposal": {
     pinColor: "#059669",
     bg: "bg-emerald-50",
     text: "text-emerald-700",
-    icon: "🗑️",
+    icon: "Waste",
+    svg: '<path d="M9 3h6a1 1 0 0 1 1 1v1h3a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-1v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h3V4a1 1 0 0 1 1-1zm1 2v1h4V5H10zm-2 4v10h8V9H8zm2 1a1 1 0 0 1 1 1v6a1 1 0 0 1-2 0v-6a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v6a1 1 0 0 1-2 0v-6a1 1 0 0 1 1-1z"/>',
   },
   "Water Shortage": {
     pinColor: "#3b82f6",
     bg: "bg-blue-50",
     text: "text-blue-700",
-    icon: "💧",
+    icon: "Water Drop",
+    svg: '<path d="M12 2S6 9 6 14a6 6 0 0 0 12 0c0-5-6-12-6-12zm0 18a4 4 0 0 1-4-4c0-.5.2-1.2.5-2 .5 1.5 2 2.5 3.5 2.5a3.5 3.5 0 0 0 3.5-3c.3.8.5 1.7.5 2.5a4 4 0 0 1-4 4z"/>',
   },
   "Power / Electricity": {
     pinColor: "#eab308",
     bg: "bg-yellow-50",
     text: "text-yellow-700",
-    icon: "⚡",
+    icon: "Power",
+    svg: '<path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/>',
   },
   "Security Concern": {
     pinColor: "#dc2626",
     bg: "bg-red-50",
     text: "text-red-700",
-    icon: "🚨",
+    icon: "Security",
+    svg: '<path d="M12 2L4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3zm0 4l6 2v5c0 3.5-2.5 7-6 8.5C8.5 20 6 16.5 6 13V8l6-2zm-1 4a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0v-3a1 1 0 0 1 1-1zm0 6a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4z"/>',
   },
   "Others": {
     pinColor: "#8b5cf6",
     bg: "bg-purple-50",
     text: "text-purple-700",
-    icon: "📌",
+    icon: "Pin",
+    svg: '<path d="M12 2C7.6 2 4 5.6 4 10c0 4.4 8 12 8 12s8-7.6 8-12c0-4.4-3.6-8-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>',
   },
 };
 
@@ -86,6 +95,7 @@ interface IssueMapProps {
   onSelectIssue: (issue: MapIssue | null) => void;
   onUpvote: (id: string) => void;
   userUpvoted: Record<string, boolean>;
+  searchLocation?: string;
 }
 
 export default function IssueMap({
@@ -94,6 +104,7 @@ export default function IssueMap({
   onSelectIssue,
   onUpvote,
   userUpvoted,
+  searchLocation,
 }: IssueMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
@@ -101,7 +112,7 @@ export default function IssueMap({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapType, setMapType] = useState<"standard" | "satellite">("standard");
 
-  const buildPin = (color: string, isSelected: boolean, icon: string) => {
+  const buildPin = (color: string, isSelected: boolean, svgPath: string) => {
     const element = document.createElement("div");
     element.style.position = "relative";
     element.style.width = "34px";
@@ -113,7 +124,9 @@ export default function IssueMap({
           <path fill="${color}" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0z"/>
           <circle cx="192" cy="192" r="82" fill="#ffffff"/>
         </svg>
-        <div style="position:absolute;top:7px;left:0;right:0;display:flex;justify-content:center;font-size:13px;">${icon}</div>
+        <svg viewBox="0 0 24 24" width="22" height="22" style="position:absolute;top:9px;left:50%;transform:translateX(-50%);fill:${color};stroke:none;">
+          ${svgPath}
+        </svg>
         ${isSelected ? '<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;background:#0f5d4a;border-radius:9999px;border:2px solid white;"></div>' : ""}
       </div>
     `;
@@ -187,7 +200,7 @@ export default function IssueMap({
       const config = CATEGORY_COLORS[issue.category] || CATEGORY_COLORS["Others"];
       const isSelected = selectedIssue?.id === issue.id;
       const marker = new maplibregl.Marker({
-        element: buildPin(config.pinColor, isSelected, config.icon),
+        element: buildPin(config.pinColor, isSelected, config.svg),
         anchor: "bottom",
       })
         .setLngLat([issue.lng, issue.lat])
@@ -211,6 +224,38 @@ export default function IssueMap({
       });
     }
   }, [selectedIssue]);
+
+  // Geocode search location and fly the map there
+  useEffect(() => {
+    const query = searchLocation?.trim();
+    if (!query || !mapInstanceRef.current) return;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
+          { signal: controller.signal, headers: { Accept: "application/json" } }
+        );
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const { lat, lon } = data[0];
+          mapInstanceRef.current?.flyTo({
+            center: [parseFloat(lon), parseFloat(lat)],
+            zoom: 13,
+            speed: 1.2,
+          });
+        }
+      } catch {
+        // silently ignore — user may see "0 found" in the UI
+      }
+    }, 600);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
+  }, [searchLocation]);
 
   const handleZoomIn = () => {
     if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
@@ -258,7 +303,7 @@ export default function IssueMap({
         <button
           type="button"
           onClick={toggleMapLayer}
-          className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-[#d8dcd6] bg-white text-[#374151] shadow-md transition hover:bg-[#f4f5f3] hover:text-[#0f5d4a] active:scale-95"
+          className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/50 bg-white/30 text-[#374151] shadow-[0_8px_30px_rgba(15,16,19,0.08)] backdrop-blur-xl transition hover:bg-white/50 hover:text-[#0f5d4a] active:scale-95"
           title={`Switch to ${mapType === "standard" ? "Layer" : "Street"} View`}
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -271,11 +316,11 @@ export default function IssueMap({
       </div>
 
       <div className="absolute right-4 bottom-20 md:bottom-8 z-20 flex flex-col items-center gap-2">
-        <div className="flex flex-col overflow-hidden rounded-xl border border-[#d8dcd6] bg-white shadow-md">
+        <div className="flex flex-col overflow-hidden rounded-xl border border-white/50 bg-white/30 shadow-[0_8px_30px_rgba(15,16,19,0.08)] backdrop-blur-xl">
           <button
             type="button"
             onClick={handleZoomIn}
-            className="flex h-10 w-10 items-center justify-center border-b border-[#e5e8e3] text-lg font-bold text-[#374151] hover:bg-[#f4f5f3] hover:text-[#0f5d4a] active:bg-gray-100"
+            className="flex h-10 w-10 items-center justify-center border-b border-white/40 text-lg font-bold text-[#374151] hover:bg-white/40 hover:text-[#0f5d4a] active:bg-white/60"
             aria-label="Zoom in"
           >
             +
@@ -283,7 +328,7 @@ export default function IssueMap({
           <button
             type="button"
             onClick={handleZoomOut}
-            className="flex h-10 w-10 items-center justify-center text-lg font-bold text-[#374151] hover:bg-[#f4f5f3] hover:text-[#0f5d4a] active:bg-gray-100"
+            className="flex h-10 w-10 items-center justify-center text-lg font-bold text-[#374151] hover:bg-white/40 hover:text-[#0f5d4a] active:bg-white/60"
             aria-label="Zoom out"
           >
             −
@@ -293,7 +338,7 @@ export default function IssueMap({
         <button
           type="button"
           onClick={handleDetectLocation}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#d8dcd6] bg-white text-[#374151] shadow-md transition hover:bg-[#f4f5f3] hover:text-[#0f5d4a] active:scale-95"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/50 bg-white/30 text-[#374151] shadow-[0_8px_30px_rgba(15,16,19,0.08)] backdrop-blur-xl transition hover:bg-white/50 hover:text-[#0f5d4a] active:scale-95"
           title="Detect My Location"
           aria-label="Detect My Location"
         >
@@ -313,7 +358,7 @@ export default function IssueMap({
       </div>
 
       {selectedIssue && (
-        <div className="absolute left-4 right-4 md:left-auto md:right-20 bottom-24 md:bottom-8 z-30 max-w-sm rounded-2xl border border-[#e2e6e1] bg-white p-4 shadow-xl transition-all duration-200">
+        <div className="absolute left-4 right-4 md:left-auto md:right-20 bottom-24 md:bottom-8 z-30 max-w-sm rounded-[22px] border border-white/50 bg-white/30 p-4 shadow-[0_20px_60px_rgba(15,16,19,0.08)] backdrop-blur-xl transition-all duration-200">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2">
               <span
@@ -366,6 +411,17 @@ export default function IssueMap({
               </div>
             </div>
           </div>
+
+          <Link
+            href={`/issues/${selectedIssue.id}`}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[linear-gradient(135deg,#ee7c2d,#d76a1a)] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:brightness-105 active:scale-[0.98]"
+          >
+            View full details
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </Link>
         </div>
       )}
     </div>

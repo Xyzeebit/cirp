@@ -30,6 +30,7 @@ export default function IssueDetailPage() {
     const [submitting, setSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [optimisticComments, setOptimisticComments] = useState<IssueCommentRecord[]>([]);
 
     useEffect(() => {
         if (!issueId) return;
@@ -53,23 +54,51 @@ export default function IssueDetailPage() {
         event.preventDefault();
         if (!issue) return;
 
+        const trimmedComment = comment.trim();
+        if (!trimmedComment) {
+            setErrorMessage("Comment cannot be empty.");
+            return;
+        }
+
         setSubmitting(true);
         setErrorMessage("");
 
         try {
-            await addIssueComment({
-                issueId: issue.id,
-                content: comment,
-                authorName: authorName.trim() || undefined,
-            });
+            const trimmedAuthor = authorName.trim();
 
-            const refreshed = await getIssueById(issue.id);
-            setIssue(refreshed);
+            // Optimistically add the comment to the UI immediately
+            const optimisticComment: IssueCommentRecord = {
+                id: `temp-${Date.now()}`,
+                issue_id: issue.id,
+                user_id: null,
+                author_name: trimmedAuthor || "Anonymous resident",
+                content: trimmedComment,
+                created_at: new Date().toISOString(),
+            };
+            setOptimisticComments((prev) => [optimisticComment, ...prev]);
             setComment("");
             setAuthorName("");
+
+            await addIssueComment({
+                issueId: issue.id,
+                content: trimmedComment,
+                authorName: trimmedAuthor || undefined,
+            });
+
+            // Refetch to get the real data (with server-generated id and timestamp)
+            const refreshed = await getIssueById(issue.id);
+            if (refreshed) {
+                setIssue(refreshed);
+            }
+            // Clear optimistic comments since the refetched issue now contains them
+            setOptimisticComments([]);
         } catch (error) {
+            // Rollback optimistic comment on failure
+            setOptimisticComments([]);
             const message = error instanceof Error ? error.message : "Unable to add comment.";
             setErrorMessage(message);
+            // Restore the comment text so the user can retry
+            setComment(comment);
         } finally {
             setSubmitting(false);
         }
@@ -78,10 +107,9 @@ export default function IssueDetailPage() {
     const images = useMemo(() => issue?.issue_images ?? [], [issue]);
     const comments = useMemo(
         () =>
-            (issue?.issue_comments ?? [])
-                .slice()
+            [...optimisticComments, ...(issue?.issue_comments ?? [])]
                 .sort((a: IssueCommentRecord, b: IssueCommentRecord) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
-        [issue]
+        [issue, optimisticComments]
     );
     const hasLocationCoords = issue ? issue.lat != null && issue.lng != null : false;
     const parsedLocation = useMemo(() => (issue ? parseLocation(issue.location) : { address: "", coords: null }), [issue]);
