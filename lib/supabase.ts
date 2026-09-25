@@ -95,6 +95,15 @@ export async function signInWithEmail(email: string, password: string) {
   return data;
 }
 
+export async function resetPasswordWithEmail(email: string) {
+  const redirectTo = `${window.location.origin}/login`;
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    redirectTo,
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function signUpWithEmail(payload: {
   email: string;
   password: string;

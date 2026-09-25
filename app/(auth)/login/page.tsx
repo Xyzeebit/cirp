@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signInWithEmail } from "@/lib/supabase";
+import { signInWithEmail, supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +14,17 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Detect password-recovery redirect from Supabase
+  useEffect(() => {
+    const detectRecovery = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      if (hashParams.get("type") === "recovery") {
+        setSuccessMessage("Your password reset link is verified. Please sign in with your new password.");
+      }
+    };
+    void detectRecovery();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,7 +142,7 @@ export default function LoginPage() {
                 <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
                 <span>Remember me</span>
               </label>
-              <Link href="/login" className="auth-link">Forgot Password?</Link>
+              <Link href="/forgot-password" className="auth-link">Forgot Password?</Link>
             </div>
 
             <button type="submit" className="auth-button" disabled={isLoading}>
