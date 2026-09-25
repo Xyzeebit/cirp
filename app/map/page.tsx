@@ -5,6 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { MapIssue, CATEGORY_COLORS } from "@/components/IssueMap";
 import { getIssues, parseLocation, type IssueRecord } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 // Dynamically import Leaflet IssueMap to avoid SSR 'window is not defined'
 const IssueMap = dynamic(() => import("@/components/IssueMap"), {
@@ -93,6 +94,46 @@ export default function MapPage() {
   const [userUpvoted, setUserUpvoted] = useState<Record<string, boolean>>({});
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{
+    email?: string;
+    user_metadata?: {
+      full_name?: string;
+      avatar_url?: string;
+    };
+  } | null>(null);
+
+  // Sync auth state with Supabase
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!isMounted) return;
+      setUser(session?.user ?? null);
+    };
+
+    void syncUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      isMounted = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const isSignedIn = Boolean(user);
+  const userName = user?.user_metadata?.full_name?.trim() || user?.email?.split("@")[0]?.trim() || "Resident";
+  const userInitials = userName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "U";
+  const avatarUrl = user?.user_metadata?.avatar_url;
 
   const loadIssues = async () => {
     setLoading(true);
@@ -222,20 +263,39 @@ export default function MapPage() {
             </div>
           </div>
 
-          {/* Desktop Auth Buttons */}
+          {/* Desktop Auth Buttons / User Avatar */}
           <div className="hidden sm:flex items-center gap-2.5 shrink-0">
-            <Link
-              href="/login"
-              className="rounded border border-[rgba(73,86,125,0.12)] bg-black text-white/70 px-4 py-1.5 text-sm font-medium shadow-xs transition hover:border-[#ee7c2d] hover:bg-white hover:text-[#ee7c2d]"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="rounded bg-[linear-gradient(135deg,#ee7c2d,#d76a1a)] px-4.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-105 hover:shadow-md active:scale-98"
-            >
-              Register
-            </Link>
+            {isSignedIn ? (
+              <Link
+                href="/dashboard"
+                aria-label="Open dashboard"
+                className="flex items-center gap-2 rounded border border-[rgba(73,86,125,0.16)] bg-white/80 px-2 py-1.5 shadow-sm transition hover:border-[#ee7c2d] hover:shadow-md"
+              >
+                <div className="h-8 w-8 overflow-hidden rounded-full border border-[rgba(73,86,125,0.14)] bg-[rgba(234,220,197,0.7)] text-[#ee7c2d]">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[0.72rem] font-bold">{userInitials}</div>
+                  )}
+                </div>
+                <span className="hidden xl:inline text-sm font-semibold text-[#111111]">{userName}</span>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded border border-[rgba(73,86,125,0.12)] bg-black text-white/70 px-4 py-1.5 text-sm font-medium shadow-xs transition hover:border-[#ee7c2d] hover:bg-white hover:text-[#ee7c2d]"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded bg-[linear-gradient(135deg,#ee7c2d,#d76a1a)] px-4.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-105 hover:shadow-md active:scale-98"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Filter Toggle Button */}

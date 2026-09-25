@@ -161,7 +161,7 @@ export default function IssuesPage() {
                         Issues
                     </h1>
                     <div className="mt-2 flex items-center gap-1 text-xs text-[#64748b] sm:text-sm">
-                        <Link href="/" className="transition hover:text-[#0f5d4a]">
+                        <Link href="/" className="transition hover:text-[var(--primary)]">
                             Home
                         </Link>
                         <span className="text-[#94a3b8]">&nbsp;&gt;&nbsp;</span>
@@ -215,7 +215,7 @@ export default function IssuesPage() {
                         <div className="flex items-center gap-2 self-end lg:self-auto">
                             <button
                                 type="button"
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-[#d8dcd6] bg-[#f9faf9] px-3 py-2 text-xs font-medium text-[#374151] transition hover:border-[#cfe3d8] hover:text-[#0f5d4a]"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-[#d8dcd6] bg-[#f9faf9] px-3 py-2 text-xs font-medium text-[#374151] transition hover:border-[var(--accent)] hover:text-[var(--primary)]"
                             >
                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
@@ -232,7 +232,7 @@ export default function IssuesPage() {
                                 <select
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full appearance-none rounded-lg border border-[#d8dcd6] bg-[#f9faf9] px-3 py-2 text-sm text-[#0f172a] outline-none transition focus:border-[#0f5d4a] focus:bg-white focus:ring-2 focus:ring-[#0f5d4a]/15"
+                                    className="w-full appearance-none rounded-lg border border-[#d8dcd6] bg-[#f9faf9] px-3 py-2 text-sm text-[#0f172a] outline-none transition focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[var(--primary)]/15"
                                 >
                                     {categories.map((value) => (
                                         <option key={value} value={value}>{value}</option>
@@ -252,7 +252,7 @@ export default function IssuesPage() {
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full appearance-none rounded-lg border border-[#d8dcd6] bg-[#f9faf9] px-3 py-2 text-sm text-[#0f172a] outline-none transition focus:border-[#0f5d4a] focus:bg-white focus:ring-2 focus:ring-[#0f5d4a]/15"
+                                    className="w-full appearance-none rounded-lg border border-[#d8dcd6] bg-[#f9faf9] px-3 py-2 text-sm text-[#0f172a] outline-none transition focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[var(--primary)]/15"
                                 >
                                     <option>Newest</option>
                                     <option>Most Voted</option>
@@ -270,7 +270,7 @@ export default function IssuesPage() {
                             <button
                                 type="button"
                                 onClick={() => setListView("list")}
-                                className={`flex h-10 w-10 items-center justify-center rounded-lg border ${listView === "list" ? "border-[#d5dad3] bg-[#0f5d4a] text-white" : "border-[#d8dcd6] bg-[#f9faf9] text-[#4b5563]"}`}
+                                className={`flex h-10 w-10 items-center justify-center rounded-lg border ${listView === "list" ? "border-[var(--accent)] bg-[var(--primary)] text-white" : "border-[#d8dcd6] bg-[#f9faf9] text-[#4b5563]"}`}
                                 aria-label="List view"
                             >
                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -285,7 +285,7 @@ export default function IssuesPage() {
                             <button
                                 type="button"
                                 onClick={() => setListView("grid")}
-                                className={`flex h-10 w-10 items-center justify-center rounded-lg border ${listView === "grid" ? "border-[#d5dad3] bg-[#0f5d4a] text-white" : "border-[#d8dcd6] bg-[#f9faf9] text-[#4b5563]"}`}
+                                className={`flex h-10 w-10 items-center justify-center rounded-lg border ${listView === "grid" ? "border-[var(--accent)] bg-[var(--primary)] text-white" : "border-[#d8dcd6] bg-[#f9faf9] text-[#4b5563]"}`}
                                 aria-label="Grid view"
                             >
                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -363,7 +363,7 @@ export default function IssuesPage() {
 
                                         <div className="text-right text-xs text-[#64748b]">{issue.time}</div>
 
-                                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#dfe4de] bg-[#f7f8f7] text-[#374151] transition hover:border-[#0f5d4a] hover:text-[#0f5d4a]">
+                                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#dfe4de] bg-[#f7f8f7] text-[#374151] transition hover:border-[var(--primary)] hover:text-[var(--primary)]">
                                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M5 12h14" />
                                                 <path d="m12 5 7 7-7 7" />
