@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { MAX_IMAGE_SIZE_BYTES, MAX_ISSUE_IMAGES, createIssueEntry, formatLocation } from "@/lib/supabase";
+import { MAX_IMAGE_SIZE_BYTES, MAX_ISSUE_IMAGES, createIssueEntry, formatLocation, supabase } from "@/lib/supabase";
 
 const DEFAULT_COORDS = { lat: 5.037, lng: 7.926 };
 
@@ -27,6 +27,20 @@ export default function ReportPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+    const [userId, setUserId] = useState<string | null>(null);
+
+    // Detect if user is logged in — require auth for reporting
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setUserId(session?.user?.id ?? null);
+        };
+        void checkAuth();
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUserId(session?.user?.id ?? null);
+        });
+        return () => { authListener.subscription.unsubscribe(); };
+    }, []);
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<maplibregl.Map | null>(null);
@@ -182,6 +196,11 @@ export default function ReportPage() {
         setErrorMessage("");
         setSuccessMessage("");
 
+        if (!userId) {
+            setErrorMessage("Please log in to report an issue. You can still report anonymously to hide your identity.");
+            return;
+        }
+
         if (!title.trim() || !category || !description.trim() || !locationAddress.trim()) {
             setErrorMessage("Please complete the required fields before submitting.");
             return;
@@ -333,13 +352,24 @@ export default function ReportPage() {
                             <input id="contact" type="text" value={contactInfo} onChange={(e) => setContactInfo(e.target.value)} placeholder="Email address or phone number" className="w-full rounded-xl border border-[#d8dcd6] bg-[#f9faf9] px-3.5 py-3 text-sm text-[#0f172a] placeholder:text-[#94a3b8] outline-none transition focus:border-[#0f5d4a] focus:bg-white focus:ring-2 focus:ring-[#0f5d4a]/15" />
                         </div>
 
-                        <label className="flex items-center gap-3 text-sm text-[#334155]">
-                            <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} className="h-4 w-4 rounded border-[#cbd5e1] text-[#0f5d4a] focus:ring-[#0f5d4a]/20" />
-                            <span>Report anonymously</span>
-                        </label>
+                        <div className="rounded-xl border border-[#dfe4de] bg-[#f9faf9] p-3">
+                            <label className="flex items-start gap-3 text-sm text-[#334155]">
+                                <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] text-[#0f5d4a] focus:ring-[#0f5d4a]/20" />
+                                <span>
+                                    <span className="font-semibold">Report anonymously</span>
+                                    <span className="mt-0.5 block text-xs text-[#64748b]">Your identity will be hidden from the public report, but your account is still linked for follow-up.</span>
+                                </span>
+                            </label>
+                        </div>
 
-                        <button type="submit" disabled={isSubmitting} className="mt-2 w-full rounded-xl bg-[#0f5d4a] px-4 py-3 text-base font-bold text-white shadow-[0_10px_20px_rgba(15,93,74,0.18)] transition hover:bg-[#0b4d3e] active:scale-[0.99] disabled:opacity-60">
-                            {isSubmitting ? "Submitting..." : "Submit Issue"}
+                        {!userId && (
+                            <div className="rounded-xl border border-[#ee7c2d]/30 bg-[#fff8f2] p-3 text-sm text-[#9a4b13]">
+                                You need to be signed in to report an issue. <Link href="/login" className="font-semibold underline hover:text-[#d76a1a]">Log in</Link> or <Link href="/register" className="font-semibold underline hover:text-[#d76a1a]">create an account</Link>.
+                            </div>
+                        )}
+
+                        <button type="submit" disabled={isSubmitting || !userId} className="mt-2 w-full rounded-xl bg-[#0f5d4a] px-4 py-3 text-base font-bold text-white shadow-[0_10px_20px_rgba(15,93,74,0.18)] transition hover:bg-[#0b4d3e] active:scale-[0.99] disabled:opacity-60">
+                            {isSubmitting ? "Submitting..." : !userId ? "Log in to submit" : "Submit Issue"}
                         </button>
                     </form>
                 </div>
