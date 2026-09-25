@@ -34,8 +34,7 @@ const statusStyles: Record<IssueItem["status"], string> = {
     Resolved: "bg-[#dcfce7] text-[#15803d]",
 };
 
-const fallbackImage =
-    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=80";
+const fallbackImage = "/logo.svg";
 
 function formatRelativeTime(dateString: string) {
     const date = new Date(dateString);

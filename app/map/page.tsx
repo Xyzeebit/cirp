@@ -32,8 +32,7 @@ const FALLBACK_MAP_ISSUES: MapIssue[] = [
     time: "Recently",
     votes: 0,
     comments: 0,
-    image:
-      "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80",
+    image: "/logo.svg",
   },
 ];
 
@@ -64,9 +63,7 @@ function toMapIssue(issue: IssueRecord): MapIssue | null {
     time: formatRelativeTime(issue.created_at),
     votes: 0,
     comments: issue.issue_comments?.length ?? 0,
-    image:
-      issue.issue_images?.[0]?.image_url ??
-      "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80",
+    image: issue.issue_images?.[0]?.image_url ?? "/logo.svg",
   };
 }
 
@@ -135,7 +132,32 @@ export default function MapPage() {
     .join("") || "U";
   const avatarUrl = user?.user_metadata?.avatar_url;
 
-  const loadIssues = async () => {
+  useEffect(() => {
+    let ignore = false;
+    getIssues()
+      .then((dbIssues) => {
+        if (ignore) return;
+        const mapped = dbIssues
+          .map(toMapIssue)
+          .filter((issue): issue is MapIssue => issue !== null);
+        if (mapped.length > 0) {
+          setIssues(mapped);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Failed to load map issues:", error);
+        if (!ignore) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const handleRefresh = async () => {
     setLoading(true);
     try {
       const dbIssues = await getIssues();
@@ -151,10 +173,6 @@ export default function MapPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    void loadIssues();
-  }, []);
 
   // Toggle status filter
   const toggleStatus = (statusName: string) => {
@@ -333,7 +351,7 @@ export default function MapPage() {
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <span className="text-xs font-semibold text-[#111111]">Searching:</span>
-              <span className="max-w-[200px] truncate text-xs text-[#4b5563]">"{searchLocation.trim()}"</span>
+              <span className="max-w-[200px] truncate text-xs text-[#4b5563]">&ldquo;{searchLocation.trim()}&rdquo;</span>
               <span className="rounded bg-[#fff3e8] px-2 py-0.5 text-[0.68rem] font-bold text-[#ee7c2d]">{filteredIssues.length} found</span>
               <button
                 type="button"
@@ -374,7 +392,7 @@ export default function MapPage() {
             <div className="h-4 w-px bg-[rgba(17,17,17,0.08)]" />
             <button
               type="button"
-              onClick={() => void loadIssues()}
+              onClick={() => void handleRefresh()}
               disabled={loading}
               className="flex items-center gap-1 rounded-lg px-2 py-1 text-[0.68rem] font-semibold text-[#ee7c2d] transition hover:bg-[#fff3e8] disabled:opacity-50"
               title="Refresh issues"

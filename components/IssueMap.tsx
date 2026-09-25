@@ -109,6 +109,10 @@ export default function IssueMap({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const onSelectIssueRef = useRef(onSelectIssue);
+  useEffect(() => {
+    onSelectIssueRef.current = onSelectIssue;
+  }, [onSelectIssue]);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapType, setMapType] = useState<"standard" | "satellite">("standard");
 
@@ -179,7 +183,7 @@ export default function IssueMap({
     map.on("click", (event: maplibregl.MapMouseEvent) => {
       const target = event.originalEvent?.target as HTMLElement | undefined;
       if (target && target.classList && target.classList.contains("maplibregl-canvas")) {
-        onSelectIssue(null);
+        onSelectIssueRef.current(null);
       }
     });
 
@@ -213,7 +217,7 @@ export default function IssueMap({
 
       markersRef.current.push(marker);
     });
-  }, [issues, mapLoaded, selectedIssue]);
+  }, [issues, mapLoaded, selectedIssue, onSelectIssue]);
 
   useEffect(() => {
     if (selectedIssue && mapInstanceRef.current) {
@@ -386,7 +390,11 @@ export default function IssueMap({
 
           <div className="mt-2 flex gap-3">
             <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-              <img src={selectedIssue.image} alt={selectedIssue.title} className="h-full w-full object-cover" />
+              <img
+                src={selectedIssue.image}
+                alt={selectedIssue.title}
+                className={`h-full w-full ${selectedIssue.image.includes("logo.svg") ? "object-contain p-2 bg-[#fff8f3]" : "object-cover"}`}
+              />
             </div>
             <div className="min-w-0 flex-1">
               <h4 className="text-sm font-bold text-[#0f172a] truncate">{selectedIssue.title}</h4>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
@@ -13,7 +13,7 @@ const DEFAULT_COORDS = { lat: 5.037, lng: 7.926 };
 
 export default function ReportPage() {
     const router = useRouter();
-    const formatCoords = (coords: { lat: number; lng: number }) => `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
+    const formatCoords = useCallback((coords: { lat: number; lng: number }) => `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`, []);
 
     const [title, setTitle] = useState("");
     const [category, setCategory] = useState("");
@@ -25,6 +25,7 @@ export default function ReportPage() {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [selectedLocation, setSelectedLocation] = useState(DEFAULT_COORDS);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const isSubmittingRef = useRef(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
     const [userId, setUserId] = useState<string | null>(null);
@@ -49,11 +50,11 @@ export default function ReportPage() {
     const photoCount = useMemo(() => selectedFiles.length, [selectedFiles]);
     const previewUrls = useMemo(() => selectedFiles.slice(0, MAX_ISSUE_IMAGES).map((file) => URL.createObjectURL(file)), [selectedFiles]);
 
-    const applyCoordsToLocation = (coords: { lat: number; lng: number }) => {
+    const applyCoordsToLocation = useCallback((coords: { lat: number; lng: number }) => {
         const formatted = formatCoords(coords);
         setSelectedLocation(coords);
         setLocation(formatted);
-    };
+    }, [formatCoords]);
 
     useEffect(() => {
         return () => {
@@ -137,7 +138,7 @@ export default function ReportPage() {
             mapRef.current = null;
             markerRef.current = null;
         };
-    }, []);
+    }, [applyCoordsToLocation]);
 
     const handleDetectLocation = () => {
         if (!navigator.geolocation) {
@@ -211,6 +212,10 @@ export default function ReportPage() {
             return;
         }
 
+        // Prevent double submission synchronously before React state batched updates
+        if (isSubmittingRef.current || isSubmitting) return;
+
+        isSubmittingRef.current = true;
         setIsSubmitting(true);
 
         try {
@@ -226,13 +231,15 @@ export default function ReportPage() {
                 files: selectedFiles,
             });
 
-            setSuccessMessage("Issue submitted successfully.");
+            setSuccessMessage("Issue submitted successfully. Redirecting...");
+
+            // Keep isSubmitting and isSubmittingRef true so user cannot submit again while redirecting
             router.push(`/issues/${issue.id}?submitted=1`);
         } catch (error) {
+            isSubmittingRef.current = false;
+            setIsSubmitting(false);
             const message = error instanceof Error ? error.message : "Unable to submit issue.";
             setErrorMessage(message);
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -325,7 +332,7 @@ export default function ReportPage() {
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm font-semibold text-[#0f172a]">Photos / Upload <span className="text-[#ef4444]">*</span></label>
+                            <label className="mb-2 block text-sm font-semibold text-[#0f172a]">Photos / Upload <span className="text-xs font-normal text-[#64748b]">(Optional — app logo used if none uploaded)</span></label>
                             <div className="grid gap-3 sm:grid-cols-3">
                                 <label className="flex min-h-[112px] cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-[#d8dcd6] bg-[#f8faf8] text-center text-[#64748b] transition hover:border-[#0f5d4a] hover:bg-[#eef5f1]">
                                     <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
@@ -368,7 +375,7 @@ export default function ReportPage() {
                             </div>
                         )}
 
-                        <button type="submit" disabled={isSubmitting || !userId} className="mt-2 w-full rounded-xl bg-[#0f5d4a] px-4 py-3 text-base font-bold text-white shadow-[0_10px_20px_rgba(15,93,74,0.18)] transition hover:bg-[#0b4d3e] active:scale-[0.99] disabled:opacity-60">
+                        <button type="submit" disabled={isSubmitting || !userId} className={`mt-2 w-full rounded-xl bg-[#0f5d4a] px-4 py-3 text-base font-bold text-white shadow-[0_10px_20px_rgba(15,93,74,0.18)] transition hover:bg-[#0b4d3e] active:scale-[0.99] disabled:opacity-60 ${isSubmitting ? "cursor-not-allowed pointer-events-none opacity-60" : ""}`}>
                             {isSubmitting ? "Submitting..." : !userId ? "Log in to submit" : "Submit Issue"}
                         </button>
                     </form>

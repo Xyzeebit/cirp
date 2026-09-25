@@ -39,7 +39,7 @@ export default function IssueDetailPage() {
             try {
                 const issueData = await getIssueById(issueId);
                 setIssue(issueData);
-                setSelectedImage(issueData?.issue_images?.[0]?.image_url ?? null);
+                setSelectedImage(issueData?.issue_images?.[0]?.image_url ?? "/logo.svg");
             } catch (error) {
                 console.error(error);
             } finally {
@@ -237,29 +237,53 @@ export default function IssueDetailPage() {
                             {images.length > 0 ? (
                                 <>
                                     <div className="mt-3 overflow-hidden rounded-[26px] border border-white/60 bg-[#f5f2ee]">
-                                        <img
-                                            src={selectedImage ?? images[0].image_url}
-                                            alt="Issue evidence"
-                                            className="h-[320px] w-full object-cover"
-                                        />
+                                        {(() => {
+                                            const activeImg = selectedImage ?? images[0].image_url;
+                                            const isLogo = activeImg.includes("logo.svg");
+                                            return (
+                                                <div className={isLogo ? "flex h-[320px] w-full items-center justify-center bg-[#fff8f3] p-8" : ""}>
+                                                    <img
+                                                        src={activeImg}
+                                                        alt="Issue evidence"
+                                                        className={isLogo ? "h-36 w-36 object-contain" : "h-[320px] w-full object-cover"}
+                                                    />
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
 
                                     <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
-                                        {images.map((image) => (
-                                            <button
-                                                key={image.id}
-                                                type="button"
-                                                onClick={() => setSelectedImage(image.image_url)}
-                                                className={`overflow-hidden rounded-2xl border transition ${selectedImage === image.image_url ? "border-[#ee7c2d] ring-2 ring-[#ee7c2d]/20" : "border-white/60"}`}
-                                            >
-                                                <img src={image.image_url} alt="Issue evidence thumbnail" className="h-20 w-full object-cover" />
-                                            </button>
-                                        ))}
+                                        {images.map((image) => {
+                                            const isLogoThumb = image.image_url.includes("logo.svg");
+                                            return (
+                                                <button
+                                                    key={image.id}
+                                                    type="button"
+                                                    onClick={() => setSelectedImage(image.image_url)}
+                                                    className={`overflow-hidden rounded-2xl border transition ${selectedImage === image.image_url ? "border-[#ee7c2d] ring-2 ring-[#ee7c2d]/20" : "border-white/60"}`}
+                                                >
+                                                    <div className={isLogoThumb ? "flex h-20 w-full items-center justify-center bg-[#fff8f3] p-2" : ""}>
+                                                        <img
+                                                            src={image.image_url}
+                                                            alt="Issue evidence thumbnail"
+                                                            className={isLogoThumb ? "h-10 w-10 object-contain" : "h-20 w-full object-cover"}
+                                                        />
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </>
                             ) : (
-                                <div className="mt-3 rounded-[22px] border border-dashed border-[#d8dcd6] bg-[#f9faf9] p-4 text-sm text-[#64748b]">
-                                    No supporting images were uploaded.
+                                <div className="mt-3 flex flex-col items-center justify-center overflow-hidden rounded-[26px] border border-white/60 bg-[#fff8f3] p-8 text-center shadow-sm">
+                                    <img
+                                        src="/logo.svg"
+                                        alt="CIRP app logo"
+                                        className="h-24 w-24 object-contain"
+                                    />
+                                    <p className="mt-3 text-xs font-medium text-[#78716c]">
+                                        No image was uploaded during report &bull; CIRP app logo used as default image
+                                    </p>
                                 </div>
                             )}
                         </div>

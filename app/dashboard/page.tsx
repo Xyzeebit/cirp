@@ -40,8 +40,7 @@ function statusClass(status: string): string {
     }
 }
 
-const FALLBACK_IMAGE =
-    "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80";
+const FALLBACK_IMAGE = "/logo.svg";
 
 const menuItems = [
     { id: "overview", label: "Dashboard", icon: "▣" },
@@ -224,7 +223,7 @@ export default function DashboardPage() {
                         <h2 className="text-2xl font-black tracking-tight text-[#0f172a]">Saved Issues</h2>
                         <div className="mt-4">
                             <div className="rounded-2xl border border-dashed border-[#cbd5e1] bg-[#fafcfb] p-6 text-center text-sm text-[#64748b]">
-                                You haven&apos;t saved any issues yet. Browse the <a href="/issues" className="font-semibold text-[var(--primary)] hover:text-[var(--primary-strong)]">Issues page</a> to bookmark items.
+                                You haven&apos;t saved any issues yet. Browse the <Link href="/issues" className="font-semibold text-[var(--primary)] hover:text-[var(--primary-strong)]">Issues page</Link> to bookmark items.
                             </div>
                         </div>
                     </div>

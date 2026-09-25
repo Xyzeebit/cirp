@@ -221,6 +221,12 @@ export async function uploadIssueImages(issueId: string, files: File[]) {
   return uploadedUrls;
 }
 
+export const DEFAULT_ISSUE_IMAGE = "/logo.svg";
+
+// Deduplication maps to guarantee an issue is never reported twice
+const activeSubmissions = new Map<string, Promise<IssueRecord>>();
+const recentSubmissions = new Map<string, { issue: IssueRecord; timestamp: number }>();
+
 export async function createIssueEntry(payload: {
   title: string;
   category: string;
@@ -231,8 +237,12 @@ export async function createIssueEntry(payload: {
   contactInfo?: string;
   anonymous: boolean;
   files: File[];
-}) {
-  if (!payload.title.trim() || !payload.description.trim() || !payload.location.trim()) {
+}): Promise<IssueRecord> {
+  const trimmedTitle = payload.title.trim();
+  const trimmedDescription = payload.description.trim();
+  const trimmedLocation = payload.location.trim();
+
+  if (!trimmedTitle || !trimmedDescription || !trimmedLocation) {
     throw new Error("Please complete the required fields before submitting.");
   }
 
@@ -245,31 +255,88 @@ export async function createIssueEntry(payload: {
   }
 
   const { data: userData } = await supabase.auth.getUser();
-  const reporterName = payload.anonymous ? "Anonymous resident" : userData.user?.user_metadata?.full_name ?? "Resident";
+  const userId = userData.user?.id ?? "anon";
 
-  const { data: createdIssue, error: issueError } = await supabase
-    .from("issues")
-    .insert({
-      title: payload.title.trim(),
-      category: payload.category,
-      description: payload.description.trim(),
-      location: payload.location.trim(),
-      lat: payload.lat,
-      lng: payload.lng,
-      status: "Submitted",
-      is_anonymous: payload.anonymous,
-      user_id: userData.user?.id ?? null,
-      reporter_name: reporterName,
-      contact_info: payload.contactInfo?.trim() || null,
-    })
-    .select()
-    .single();
+  // Create submission fingerprint to guarantee duplicate prevention
+  const fingerprint = `${userId}::${payload.category}::${trimmedTitle.toLowerCase()}::${trimmedDescription.toLowerCase()}::${trimmedLocation.toLowerCase()}`;
 
-  if (issueError) throw issueError;
-
-  if (payload.files.length) {
-    await uploadIssueImages(createdIssue.id, payload.files);
+  // Purge expired recent submissions (older than 10 seconds)
+  const now = Date.now();
+  for (const [key, val] of recentSubmissions.entries()) {
+    if (now - val.timestamp > 10000) {
+      recentSubmissions.delete(key);
+    }
   }
 
-  return createdIssue;
+  // If identical submission was completed in the last 10 seconds, return the existing issue
+  const recent = recentSubmissions.get(fingerprint);
+  if (recent && now - recent.timestamp < 10000) {
+    return recent.issue;
+  }
+
+  // If identical submission is currently in-flight, await the same promise
+  const existingPromise = activeSubmissions.get(fingerprint);
+  if (existingPromise) {
+    return existingPromise;
+  }
+
+  const executeSubmission = async (): Promise<IssueRecord> => {
+    const reporterName = payload.anonymous
+      ? "Anonymous resident"
+      : userData.user?.user_metadata?.full_name ?? "Resident";
+
+    const { data: createdIssue, error: issueError } = await supabase
+      .from("issues")
+      .insert({
+        title: trimmedTitle,
+        category: payload.category,
+        description: trimmedDescription,
+        location: trimmedLocation,
+        lat: payload.lat,
+        lng: payload.lng,
+        status: "Submitted",
+        is_anonymous: payload.anonymous,
+        user_id: userData.user?.id ?? null,
+        reporter_name: reporterName,
+        contact_info: payload.contactInfo?.trim() || null,
+      })
+      .select()
+      .single();
+
+    if (issueError) throw issueError;
+
+    if (payload.files.length) {
+      await uploadIssueImages(createdIssue.id, payload.files);
+    } else {
+      // When an image is not uploaded during report, confirm the app logo is used as the image
+      const { data: logoData, error: logoError } = await supabase
+        .from("issue_images")
+        .insert({
+          issue_id: createdIssue.id,
+          image_url: DEFAULT_ISSUE_IMAGE,
+          storage_path: "logo.svg",
+        })
+        .select();
+
+      if (logoError) {
+        console.warn("Could not insert default logo image into issue_images:", logoError);
+      } else if (logoData) {
+        createdIssue.issue_images = logoData as IssueImageRecord[];
+      }
+    }
+
+    const finalIssue = createdIssue as IssueRecord;
+    recentSubmissions.set(fingerprint, { issue: finalIssue, timestamp: Date.now() });
+    return finalIssue;
+  };
+
+  const submissionPromise = executeSubmission();
+  activeSubmissions.set(fingerprint, submissionPromise);
+
+  try {
+    return await submissionPromise;
+  } finally {
+    activeSubmissions.delete(fingerprint);
+  }
 }
+

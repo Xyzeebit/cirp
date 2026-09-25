@@ -130,7 +130,31 @@ export default function AboutPage() {
                         </div>
                     </div>
                 </section>
-              
+
+                <section className="mt-10">
+                    <p className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[#0f5d4a]">
+                        Key Features
+                    </p>
+                    <h2 className="mt-2 text-2xl font-black tracking-tight text-[#0f172a] sm:text-3xl">
+                        Comprehensive tools for effective issue reporting
+                    </h2>
+                    <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                        {featureCards.map((card) => (
+                            <div key={card.title} className="rounded-[24px] border border-[#e2e6e1] bg-white p-6 shadow-sm">
+                                <h3 className="text-lg font-bold text-[#0f172a]">{card.title}</h3>
+                                <p className="mt-2 text-sm leading-6 text-[#4b5563]">{card.description}</p>
+                                <ul className="mt-4 space-y-2 text-xs text-[#334155]">
+                                    {card.bullets.map((bullet) => (
+                                        <li key={bullet} className="flex items-center gap-2">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-[#0f5d4a]" />
+                                            {bullet}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
                 <section className="mt-10 rounded-[28px] border border-[#e2e6e1] bg-white p-5 shadow-sm sm:p-6 lg:p-8">
                     <p className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[#0f5d4a]">
